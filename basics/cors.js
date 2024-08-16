@@ -12,6 +12,8 @@
  * Machine B. a Public Api or resource 
  * else a list is set.
  * 
+ * Allow-methods : PUT , POST (What methods to allow)
+ * 
  * Machine/Domain A ----Preflight Request----> Machine/Domain B  |
  * 									<---------Options---------									 |
  * 																															 | Time
