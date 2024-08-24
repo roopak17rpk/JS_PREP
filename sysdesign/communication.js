@@ -107,4 +107,12 @@ const wss = new WebSocket({server});
 	})
 
 
-
+/**
+ * webhooks are useful for third party service
+ * lets say i am generating a image than can take 5-10min
+ * its not good to hook up a connection  with server for that much time
+ * 
+ * so you give third party a webhook link(api link type https://abcd/api/webhook)
+ * so when the processing is done it will call this link and let us know that 
+ * the image is ready
+ */
