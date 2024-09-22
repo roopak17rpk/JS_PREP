@@ -13,11 +13,11 @@ function outer() {
         sum +
         args.reduce((acc, curr) => {
           acc = acc + curr;
-					return acc;
+          return acc;
         }, 0);
     }
 
-		inner.end =  function() {
+    inner.end = function () {
       console.log(sum);
     };
 
