@@ -1,0 +1,17 @@
+{
+  "name": "ignitetheapp",
+  "version": "1.0.0",
+  "description": "ignite the app",
+  "main": "appignite.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "reactg"
+  ],
+  "author": "rpk",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel": "^2.12.0"
+  }
+}

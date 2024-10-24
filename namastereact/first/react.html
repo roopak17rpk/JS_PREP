@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>Hello World</title>
+  </head>
+  <body>
+    <div id="root">
+      <!-- will be replaced by react methods here when root.render is called -->
+      <!-- React only works insider here as i made createRoot with this id-->
+      <h1>hello world</h1>
+    </div>
+
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+    ></script>
+
+    <script src="App.js"></script>
+
+    <!-- 
+    How this code works:
+    
+    1. HTML Structure:
+       The HTML file sets up the basic structure of the web page.
+
+    2. React Integration:
+       React and ReactDOM libraries are loaded from CDN.
+
+    3. Custom JavaScript:
+       App.js is included, which contains React components and logic.
+
+    4. Rendering Process:
+       React will replace the content of the <div id="root"> with the rendered React components.
+
+    Diagram:
+
+    +------------------------+
+    |        HTML            |
+    |  +------------------+  |
+    |  |    <head>        |  |
+    |  |  (Meta, CSS)     |  |
+    |  +------------------+  |
+    |  +------------------+  |
+    |  |    <body>        |  |
+    |  |  +--------------+|  |
+    |  |  | <div id="root">|  |
+    |  |  |  (React Mount)|  |
+    |  |  +--------------+|  |
+    |  |                  |  |
+    |  |  +--------------+|  |
+    |  |  |  React CDN   |  |
+    |  |  +--------------+|  |
+    |  |  +--------------+|  |
+    |  |  |  ReactDOM CDN|  |
+    |  |  +--------------+|  |
+    |  |  +--------------+|  |
+    |  |  |   App.js     |  |
+    |  |  +--------------+|  |
+    |  +------------------+  |
+    +------------------------+
+         |
+         v
+    +-----------------------+
+    |   React Rendering     |
+    | (Replaces root content)|
+    +-----------------------+
+    -->
+  </body>
+</html>
