@@ -11,6 +11,7 @@
 	"keywords": [
 		"reactg"
 	],
+	"type": "module",
 	"author": "rpk",
 	"license": "ISC",
 	"devDependencies": {
