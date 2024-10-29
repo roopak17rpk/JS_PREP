@@ -1,11 +1,11 @@
-function createTimeout() {
+export function createTimeout() {
   let timerId = 0;
   let timerMap = {};
 
   const requestIdleCallback = setImmediate;
 
   function setTimeoutPoly(callback, delay) {
-    id = timerId++;
+    let id = timerId++;
     timerMap[id] = true;
 
     let start = Date.now();
@@ -30,10 +30,10 @@ function createTimeout() {
 
 const { setTimeoutPoly, clearTimeoutPoly } = createTimeout();
 
-console.log("start");
-const timerID = setTimeoutPoly(() => {
-  console.log("hello");
-}, 2000);
-console.log("end");
+// console.log("start");
+// const timerID = setTimeoutPoly(() => {
+//   console.log("hello");
+// }, 2000);
+// console.log("end");
 
 // clearTimeoutPoly(timerID);
