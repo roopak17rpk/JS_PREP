@@ -34,3 +34,41 @@ class User extends React.Component {
 }
 
 export default User;
+
+//**
+/**
+ * React Class Component Lifecycle Methods Order
+ * 
+ * Parent Component Lifecycle:
+ * 1. constructor(props)
+ * 2. render()
+ * 3. componentDidMount()
+ * 4. componentDidUpdate(prevProps, prevState)
+ * 5. componentWillUnmount()
+ * 
+ * When Parent has 2 Child Components (Child1, Child2):
+ * 
+ * Mounting Phase:
+ * - Parent constructor
+ * - Parent render
+ *    - Child1 constructor 
+ *    - Child1 render
+ *    - Child2 constructor
+ *    - Child2 render
+ * - Child1 componentDidMount
+ * - Child2 componentDidMount
+ * - Parent componentDidMount
+ * 
+ * Updating Phase:
+ * - Parent render
+ *    - Child1 render
+ *    - Child2 render
+ * - Child1 componentDidUpdate
+ * - Child2 componentDidUpdate
+ * - Parent componentDidUpdate
+ * 
+ * Unmounting Phase:
+ * - Child1 componentWillUnmount
+ * - Child2 componentWillUnmount
+ * - Parent componentWillUnmount
+ */
