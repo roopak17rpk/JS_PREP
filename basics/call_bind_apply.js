@@ -14,7 +14,7 @@ let nameClass2 = {
 };
 
 /**
- * with call method we can borrow functions form other objects. Call methods excepts new object and refers to it
+ * with call method we can borrow functions form other objects. Call methods accepts new object and refers to it
  *  as its this variable.
  */
 

@@ -1,28 +1,15 @@
-Function.prototype.myBind = function (...args) {
-  let context = this;
-  const params = args.slice(1);
-  return function (...localArgs) {
-    context.apply(args[0], [...params, ...localArgs]);
-  };
+const nameClass = {
+  firstName: "rpk",
+  lastName: "gupta",
+  printName: function (arg1) {
+    console.log(this.firstName, " + ", this.lastName, " + ", arg1);
+  },
 };
 
-const myPromiseAll = function (taskList) {
-  let results = [];
-  let completedPromises = 0;
-  return new Promise((resolve, reject) => {
-    taskList.forEach((task) => {
-      task
-        .then((val) => {
-          results[index] = val;
-          completedPromises += 1;
-
-          if (results?.length === taskList?.length) {
-            resolve(results);
-          }
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
-  });
+nameClass2 = {
+  firstName: "hof",
+  lastName: "kinson",
 };
+
+nameClass.printName.call(nameClass2, "cardano");
+nameClass.printName.apply(nameClass2, ["apply cardano"]);
