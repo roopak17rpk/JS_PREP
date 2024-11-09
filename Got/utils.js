@@ -8,7 +8,6 @@ const POINT_CONSTANTS = {
   PROGRESSIVE_BONUS_INTERVAL: 30, // Minutes interval for progressive bonus
   PROGRESSIVE_BONUS_POINTS: 15, // Points per interval
   TYPICAL_SESSION_MIN: 240, // 4 hours typical session
-  TYPICAL_SESSION_MAX: 360, // 6 hours max typical session
 };
 
 /**
@@ -60,7 +59,13 @@ const calculateStreak = (entries) => {
     }
   }
 
-  return { currentStreak, lastStreak, isStreakBroken, daysSinceStreak };
+  return {
+    currentStreak,
+    lastStreak,
+    isStreakBroken,
+    daysSinceStreak,
+    toString() { return this.currentStreak.toString(); }
+  };
 };
 
 /**

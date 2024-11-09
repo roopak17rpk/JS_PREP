@@ -3,15 +3,23 @@
     {
       "date": "09/11/2024",
       "streak": 1,
-      "points": 56,
-      "timeInvested": 30
+      "points": 105,
+      "timeInvested": 60
     }
   ],
   "total": {
     "streak": 1,
-    "totalTimeInvested": 30,
-    "totalPoints": 56,
-    "title": "Newcomer"
+    "totalTimeInvested": 60,
+    "totalPoints": 105,
+    "title": "Newcomer",
+    "region": "Westeros",
+    "tier": "common",
+    "nextMilestone": {
+      "points": 1260,
+      "title": "Street Rat of Flea Bottom"
+    },
+    "pointsToNext": 1260,
+    "progressToNext": "8.33%"
   },
-  "lastRecalculated": "2024-11-09T13:21:22.059Z"
+  "lastRecalculated": "2024-11-09T17:06:43.407Z"
 }

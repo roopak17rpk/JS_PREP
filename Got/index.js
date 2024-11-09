@@ -209,6 +209,68 @@ function handleChoice(choice) {
   }
 
   if (choice === "1") {
+    const today = new Date();
+    const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+    const existingData = logger.readGameData() || [];
+    
+    // Check if entry exists for today
+    const todayEntry = existingData.find(entry => {
+      // Format both dates consistently for comparison
+      const entryDate = entry.date.split('/').map(num => String(num).padStart(2, '0')).join('/');
+      return entryDate === formattedDate;
+    });
+
+    if (todayEntry) {
+      console.log("\nYou already have a conquest recorded for today!");
+      console.log(`Current time: ${todayEntry.timeInvested} minutes`);
+      console.log(`Current points: ${todayEntry.points}`);
+      console.log("\nWould you like to:");
+      console.log("1. Add more time to today's conquest");
+      console.log("2. Modify today's time completely");
+      console.log("3. Return to main menu");
+      
+      rl.question("\nChoose your action (1-3): ", (modChoice) => {
+        if (modChoice === "1" || modChoice === "2") {
+          const isAppending = modChoice === "1";
+          const promptText = isAppending ? 
+            "Additional time spent in the realm? " : 
+            "New time spent in the realm? ";
+          
+          rl.question(promptText, (newTime) => {
+            if (isNaN(newTime) || newTime <= 0) {
+              console.log("\nPlease enter a valid number of minutes!");
+              rl.question("\nPress Enter to return to the main menu...", () => {
+                displayMenu();
+              });
+              return;
+            }
+
+            const success = logger.modifyGameData(formattedDate, newTime, isAppending);
+            if (success) {
+              console.log(`\n=== ${isAppending ? 'Time Added to' : 'Updated'} Today's Chronicles ===`);
+              const data = logger.readGameData();
+              const total = logger.calculateTotal(data);
+              console.log(`Updated Title: ${total.title}`);
+              console.log(`Current Streak: ${total.streak} days`);
+              const updatedEntry = data.find(entry => 
+                entry.date.split('/').map(num => String(num).padStart(2, '0')).join('/') === formattedDate
+              );
+              console.log(`Total Time Today: ${updatedEntry.timeInvested} minutes`);
+              console.log(`Total Points Today: ${updatedEntry.points}`);
+            }
+            
+            rl.question("\nPress Enter to return to the main menu...", () => {
+              displayMenu();
+            });
+          });
+        } else {
+          displayMenu();
+        }
+      });
+      return;
+    }
+
+    // Continue with normal flow if no entry exists for today
     rl.question("How many minutes did you dedicate to the realm? ", (timeInMinutes) => {
       if (isNaN(timeInMinutes) || timeInMinutes <= 0) {
         console.log("\nPlease enter a valid number of minutes!");
@@ -229,17 +291,22 @@ function handleChoice(choice) {
         },
       ]);
 
-      const points = calculatePoints(Number(timeInMinutes), streak);
+      const pointsBreakdown = calculatePoints(Number(timeInMinutes), streak);
 
       const data = {
         date: formattedDate,
         streak,
-        points,
+        points: pointsBreakdown,
         timeInvested: Number(timeInMinutes),
       };
 
       const result = logger.writeGameData(data);
-      if (result.milestoneAchieved) {
+      if (result.isUpdatedEntry) {
+        console.log("\n=== Updated Today's Entry ===");
+        const todayEntry = logger.readGameData().find(entry => entry.date === formattedDate);
+        console.log(`Total time today: ${todayEntry.timeInvested} minutes`);
+        console.log(`Total points today: ${todayEntry.points}`);
+      } else if (result.milestoneAchieved) {
         console.log("\n=== NEW MILESTONE ACHIEVED! ===");
         console.log(getTitleArt(result.title));
         console.log(`You have risen from ${result.previousTitle} to ${result.title}!`);
@@ -256,7 +323,16 @@ function handleChoice(choice) {
       console.log("\n=== The Maester's Chronicles ===");
       console.log(getTitleArt(total.title));
       console.log(getRandomQuote());
-      console.log(`\nGlory earned: ${points} points`);
+      console.log("\n=== Points Breakdown ===");
+      console.log(`Base Points: ${pointsBreakdown.basePoints}`);
+      console.log(`Progressive Bonus: ${pointsBreakdown.progressiveBonus}`);
+      console.log(`Streak Bonus: ${pointsBreakdown.streakBonus}`);
+      console.log(`Total Glory Earned: ${pointsBreakdown.totalPoints} points`);
+      
+      if (pointsBreakdown.multiplierUsed > 0) {
+        console.log(`Streak Multiplier: ${(pointsBreakdown.multiplierUsed * 100).toFixed(0)}%`);
+      }
+      
       console.log(getMilestoneMessage(total.title));
       console.log(getStreakMessage(streak));
       
@@ -312,8 +388,9 @@ function handleChoice(choice) {
     console.log(ASCII_ART.direwolf);
     console.log("\n1. Modify existing date");
     console.log("2. Append time to today's entry");
+    console.log("3. Delete date entry");
     
-    rl.question("\nChoose your action (1-2): ", (modChoice) => {
+    rl.question("\nChoose your action (1-3): ", (modChoice) => {
       if (modChoice === "1") {
         console.log("\nPlease enter the date in DD/MM/YYYY format (e.g., 09/11/2024)");
         rl.question("Which page of history needs correction? ", (date) => {
@@ -351,6 +428,23 @@ function handleChoice(choice) {
           });
         });
       } else if (modChoice === "2") {
+        const today = new Date();
+        const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        
+        // First check if today's entry exists
+        const existingData = logger.readGameData() || [];
+        const todayEntry = existingData.find(entry => 
+          entry.date.split('/').map(num => String(num).padStart(2, '0')).join('/') === formattedDate
+        );
+
+        if (!todayEntry) {
+          console.log("\nNo entry exists for today yet. Please use 'Record Your Conquest' first.");
+          rl.question("\nPress Enter to return to the main menu...", () => {
+            displayMenu();
+          });
+          return;
+        }
+
         rl.question("Additional time spent in the realm? ", (additionalTime) => {
           if (isNaN(additionalTime) || additionalTime <= 0) {
             console.log("\nPlease enter a valid number of minutes!");
@@ -360,9 +454,6 @@ function handleChoice(choice) {
             return;
           }
 
-          const today = new Date();
-          const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-          
           const success = logger.modifyGameData(formattedDate, additionalTime, true);
           if (success) {
             console.log("\n=== Time Added to Today's Chronicles ===");
@@ -370,15 +461,50 @@ function handleChoice(choice) {
             const total = logger.calculateTotal(data);
             console.log(`Updated Title: ${total.title}`);
             console.log(`Current Streak: ${total.streak} days`);
-            const todayEntry = data.find(entry => entry.date === formattedDate);
-            console.log(`Total Time Today: ${todayEntry.timeInvested} minutes`);
-            console.log(`Total Points Today: ${todayEntry.points}`);
+            const updatedEntry = data.find(entry => 
+              entry.date.split('/').map(num => String(num).padStart(2, '0')).join('/') === formattedDate
+            );
+            console.log(`Total Time Today: ${updatedEntry.timeInvested} minutes`);
+            console.log(`Total Points Today: ${updatedEntry.points}`);
           } else {
-            console.log("\nFailed to append time. No entry exists for today yet.");
+            console.log("\nFailed to append time. Please try again.");
           }
           
           rl.question("\nPress Enter to return to the main menu...", () => {
             displayMenu();
+          });
+        });
+      } else if (modChoice === "3") {
+        console.log("\nPlease enter the date in DD/MM/YYYY format (e.g., 09/11/2024)");
+        rl.question("Which date's record shall be erased? ", (date) => {
+          if (!isValidDateFormat(date)) {
+            console.log("\nInvalid date format! Please use DD/MM/YYYY format.");
+            rl.question("\nPress Enter to return to the main menu...", () => {
+              displayMenu();
+            });
+            return;
+          }
+
+          rl.question("\nAre you sure you want to delete this record? (y/n): ", (confirm) => {
+            if (confirm.toLowerCase() === 'y') {
+              const success = logger.deleteGameData(date);
+              if (success) {
+                console.log("\n=== Record Erased from History ===");
+                const data = logger.readGameData();
+                const total = logger.calculateTotal(data);
+                console.log(`Updated Title: ${total.title}`);
+                console.log(`Current Streak: ${total.streak} days`);
+                console.log(`Remaining Records: ${data.length}`);
+              } else {
+                console.log("\nFailed to delete the record. The date might not exist in the chronicles.");
+              }
+            } else {
+              console.log("\nDeletion cancelled.");
+            }
+            
+            rl.question("\nPress Enter to return to the main menu...", () => {
+              displayMenu();
+            });
           });
         });
       } else {
