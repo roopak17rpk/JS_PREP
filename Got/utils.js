@@ -4,23 +4,19 @@
 const POINT_CONSTANTS = {
   MINIMUM_STREAK_TIME: 120, // 2 hours minimum for streak multiplier
   BASE_STREAK_MULTIPLIER: 0.20, // 20% bonus per streak day
-  STREAK_LOSS_PENALTIES: [0.75, 0.50, 0.25], // Penalties for days 1, 2, and 3 after streak loss
   PROGRESSIVE_BONUS_INTERVAL: 30, // Minutes interval for progressive bonus
   PROGRESSIVE_BONUS_POINTS: 15, // Points per interval
   TYPICAL_SESSION_MIN: 240, // 4 hours typical session
 };
 
 /**
- * Calculates the current streak and manages streak loss penalties
+ * Calculates the current streak
  * @param {Array} entries - Array of watching history entries
- * @returns {Object} - Streak information including penalties
+ * @returns {Object} - Streak information
  */
 const calculateStreak = (entries) => {
   if (!entries.length) return { 
-    currentStreak: 0, 
-    lastStreak: 0, 
-    isStreakBroken: false,
-    daysSinceStreak: 0 
+    currentStreak: 0
   };
 
   // Sort entries by date in descending order (newest first)
@@ -33,9 +29,11 @@ const calculateStreak = (entries) => {
   });
 
   let currentStreak = 1;
-  let lastStreak = 0;
-  let isStreakBroken = false;
-  let daysSinceStreak = 0;
+
+  // Check if the latest entry meets minimum time requirement
+  if (sortedEntries[0].timeInvested < POINT_CONSTANTS.MINIMUM_STREAK_TIME) {
+    return { currentStreak: 0 };
+  }
 
   for (let i = 1; i < sortedEntries.length; i++) {
     const [prevDay, prevMonth, prevYear] = sortedEntries[i-1].date.split('/').map(Number);
@@ -47,38 +45,27 @@ const calculateStreak = (entries) => {
     const diffTime = prevDate - currDate;
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 1) {
+    // Check both consecutive days and minimum time requirement
+    if (diffDays === 1 && sortedEntries[i].timeInvested >= POINT_CONSTANTS.MINIMUM_STREAK_TIME) {
       currentStreak++;
     } else {
-      if (currentStreak > 1) {
-        lastStreak = currentStreak;
-        isStreakBroken = true;
-        daysSinceStreak = Math.min(diffDays - 1, POINT_CONSTANTS.STREAK_LOSS_PENALTIES.length);
-      }
       break;
     }
   }
 
-  return {
-    currentStreak,
-    lastStreak,
-    isStreakBroken,
-    daysSinceStreak,
-    toString() { return this.currentStreak.toString(); }
-  };
+  return { currentStreak };
 };
 
 /**
- * Calculates points with graduated streak penalties
+ * Calculates points
  * @param {number} timeInMinutes - Time spent watching in minutes
- * @param {Object} streakInfo - Information about current and previous streaks
+ * @param {Object} streakInfo - Information about current streak
  * @returns {Object} - Calculated points and bonus breakdown
  */
 const calculatePoints = (timeInMinutes, streakInfo) => {
   const {
     MINIMUM_STREAK_TIME,
     BASE_STREAK_MULTIPLIER,
-    STREAK_LOSS_PENALTIES,
     PROGRESSIVE_BONUS_INTERVAL,
     PROGRESSIVE_BONUS_POINTS
   } = POINT_CONSTANTS;
@@ -88,7 +75,6 @@ const calculatePoints = (timeInMinutes, streakInfo) => {
     basePoints: timeInMinutes,
     progressiveBonus: 0,
     streakBonus: 0,
-    penaltyDeduction: 0,
     totalPoints: 0,
     multiplierUsed: 0
   };
@@ -99,25 +85,12 @@ const calculatePoints = (timeInMinutes, streakInfo) => {
   }
 
   // Calculate streak bonus only if minimum time threshold is met
-  if (timeInMinutes >= MINIMUM_STREAK_TIME) {
-    const { currentStreak, lastStreak, isStreakBroken, daysSinceStreak } = streakInfo;
-    
-    if (currentStreak > 1) {
-      // Active streak bonus
-      pointsBreakdown.multiplierUsed = currentStreak * BASE_STREAK_MULTIPLIER;
-      pointsBreakdown.streakBonus = Math.floor(
-        (pointsBreakdown.basePoints + pointsBreakdown.progressiveBonus) * 
-        pointsBreakdown.multiplierUsed
-      );
-    } else if (isStreakBroken && lastStreak > 1) {
-      // Apply graduated penalty based on days since streak loss
-      const penaltyMultiplier = STREAK_LOSS_PENALTIES[daysSinceStreak - 1] || 0;
-      pointsBreakdown.multiplierUsed = lastStreak * BASE_STREAK_MULTIPLIER * penaltyMultiplier;
-      pointsBreakdown.streakBonus = Math.floor(
-        (pointsBreakdown.basePoints + pointsBreakdown.progressiveBonus) * 
-        pointsBreakdown.multiplierUsed
-      );
-    }
+  if (timeInMinutes >= MINIMUM_STREAK_TIME && streakInfo.currentStreak > 1) {
+    pointsBreakdown.multiplierUsed = streakInfo.currentStreak * BASE_STREAK_MULTIPLIER;
+    pointsBreakdown.streakBonus = Math.floor(
+      (pointsBreakdown.basePoints + pointsBreakdown.progressiveBonus) * 
+      pointsBreakdown.multiplierUsed
+    );
   }
 
   // Calculate total points

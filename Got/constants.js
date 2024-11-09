@@ -25,39 +25,39 @@ const DIFFICULTY_SETTINGS = {
   }
 };
 
-// Base milestones (for Dedicated difficulty)
+// Base milestones (for Dedicated difficulty - 6 months)
 const BASE_MILESTONES = [
-  // Month 1
-  { points: TYPICAL_SESSION_POINTS.MIN * 7, title: "Street Rat of Flea Bottom" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 15, title: "Merchant of the Free Cities" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 30, title: "Captain of the City Watch" },
+  // Month 1 (Assuming average 2-3 hours daily)
+  { points: TYPICAL_SESSION_POINTS.MIN * 3, title: "Street Rat of Flea Bottom" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 7, title: "Merchant of the Free Cities" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 15, title: "Captain of the City Watch" },
   
   // Month 2
-  { points: TYPICAL_SESSION_POINTS.MIN * 45, title: "Night's Watch Recruit" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 60, title: "Ranger Beyond the Wall" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 75, title: "First Ranger" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 25, title: "Night's Watch Recruit" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 35, title: "Ranger Beyond the Wall" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 45, title: "First Ranger" },
   
   // Month 3
-  { points: TYPICAL_SESSION_POINTS.MIN * 90, title: "Lord Commander" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 105, title: "Knight of the Seven Kingdoms" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 120, title: "Lord of a Great House" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 60, title: "Lord Commander" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 75, title: "Knight of the Seven Kingdoms" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 90, title: "Lord of a Great House" },
   
   // Month 4
-  { points: TYPICAL_SESSION_POINTS.MIN * 135, title: "Master of Whispers" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 150, title: "Master of Ships" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 165, title: "Master of Laws" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 105, title: "Master of Whispers" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 120, title: "Master of Ships" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 135, title: "Master of Laws" },
   
   // Month 5
-  { points: TYPICAL_SESSION_POINTS.MIN * 180, title: "Master of Coin" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 195, title: "Hand of the King" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 210, title: "Warg of the North" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 150, title: "Master of Coin" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 165, title: "Hand of the King" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 180, title: "Warg of the North" },
   
   // Month 6 (Final Stretch)
-  { points: TYPICAL_SESSION_POINTS.MIN * 225, title: "Blood of the Dragon" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 240, title: "Dragon Rider" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 255, title: "Protector of the Realm" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 270, title: "King/Queen of the Seven Kingdoms" },
-  { points: TYPICAL_SESSION_POINTS.MIN * 285, title: "Azor Ahai Reborn" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 200, title: "Blood of the Dragon" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 220, title: "Dragon Rider" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 240, title: "Protector of the Realm" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 260, title: "King/Queen of the Seven Kingdoms" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 280, title: "Azor Ahai Reborn" },
   { points: TYPICAL_SESSION_POINTS.MIN * 300, title: "The Prince/Princess That Was Promised" }
 ];
 
