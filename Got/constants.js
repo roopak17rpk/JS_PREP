@@ -1,26 +1,115 @@
-const MILESTONES = [
-  { points: 500, title: "Peasant of Flea Bottom" },
-  { points: 1000, title: "Street Rat of King's Landing" },
-  { points: 2500, title: "Night's Watch Recruit" },
-  { points: 5000, title: "Builder of the Watch" },
-  { points: 10000, title: "Ranger of the Watch" },
-  { points: 15000, title: "Squire" },
-  { points: 25000, title: "Sworn Sword" },
-  { points: 40000, title: "Knight of the Seven Kingdoms" },
-  { points: 60000, title: "Master-at-Arms" },
-  { points: 85000, title: "Lord Commander" },
-  { points: 120000, title: "Master of Coin" },
-  { points: 160000, title: "Master of Ships" },
-  { points: 200000, title: "Master of Laws" },
-  { points: 250000, title: "Master of Whispers" },
-  { points: 350000, title: "Hand of the King" },
-  { points: 500000, title: "Dragon Rider" },
-  { points: 750000, title: "Protector of the Realm" },
-  { points: 1000000, title: "King/Queen of the Seven Kingdoms" },
-  { points: 1500000, title: "Mother/Father of Dragons" },
-  { points: 2000000, title: "The Prince/Princess That Was Promised" }
+const { POINT_CONSTANTS } = require('./utils');
+
+// Calculate base points for typical sessions
+const TYPICAL_SESSION_POINTS = {
+  MIN: POINT_CONSTANTS.TYPICAL_SESSION_MIN + 
+       Math.floor(POINT_CONSTANTS.TYPICAL_SESSION_MIN / 30) * 15,
+  MAX: POINT_CONSTANTS.TYPICAL_SESSION_MAX + 
+       Math.floor(POINT_CONSTANTS.TYPICAL_SESSION_MAX / 30) * 15
+};
+
+// Difficulty multipliers
+const DIFFICULTY_SETTINGS = {
+  CASUAL: {
+    name: "Casual (3 months journey)",
+    multiplier: 0.5,
+    description: "For those who watch occasionally - Complete journey in 3 months"
+  },
+  DEDICATED: {
+    name: "Dedicated (6 months journey)",
+    multiplier: 1,
+    description: "For regular watchers - Complete journey in 6 months"
+  },
+  HARDCORE: {
+    name: "Hardcore (12 months journey)",
+    multiplier: 2,
+    description: "For the most dedicated fans - Complete journey in 12 months"
+  }
+};
+
+// Base milestones (for Dedicated difficulty)
+const BASE_MILESTONES = [
+  // Month 1
+  { points: TYPICAL_SESSION_POINTS.MIN * 7, title: "Street Rat of Flea Bottom" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 15, title: "Merchant of the Free Cities" },
+  { points: TYPICAL_SESSION_POINTS.MAX * 30, title: "Captain of the City Watch" },
+  
+  // Month 2
+  { points: TYPICAL_SESSION_POINTS.MIN * 45, title: "Night's Watch Recruit" },
+  { points: TYPICAL_SESSION_POINTS.MAX * 60, title: "Ranger Beyond the Wall" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 75, title: "First Ranger" },
+  
+  // Month 3
+  { points: TYPICAL_SESSION_POINTS.MAX * 90, title: "Lord Commander" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 105, title: "Knight of the Seven Kingdoms" },
+  { points: TYPICAL_SESSION_POINTS.MAX * 120, title: "Lord of a Great House" },
+  
+  // Month 4
+  { points: TYPICAL_SESSION_POINTS.MIN * 135, title: "Master of Whispers" },
+  { points: TYPICAL_SESSION_POINTS.MAX * 150, title: "Master of Ships" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 165, title: "Master of Laws" },
+  
+  // Month 5
+  { points: TYPICAL_SESSION_POINTS.MAX * 180, title: "Master of Coin" },
+  { points: TYPICAL_SESSION_POINTS.MIN * 195, title: "Hand of the King" },
+  { points: TYPICAL_SESSION_POINTS.MAX * 210, title: "Warg of the North" },
+  
+  // Month 6 (Final Stretch)
+  { points: TYPICAL_SESSION_POINTS.MAX * 225, title: "Blood of the Dragon" },
+  { points: TYPICAL_SESSION_POINTS.MAX * 240, title: "Dragon Rider" },
+  { points: TYPICAL_SESSION_POINTS.MAX * 255, title: "Protector of the Realm" },
+  { points: TYPICAL_SESSION_POINTS.MAX * 270, title: "King/Queen of the Seven Kingdoms" },
+  { points: TYPICAL_SESSION_POINTS.MAX * 285, title: "Azor Ahai Reborn" },
+  { points: TYPICAL_SESSION_POINTS.MAX * 300, title: "The Prince/Princess That Was Promised" }
 ];
 
+// Function to get milestones based on difficulty
+const getMilestonesForDifficulty = (difficulty) => {
+  return BASE_MILESTONES.map(milestone => ({
+    ...milestone,
+    points: Math.floor(milestone.points * DIFFICULTY_SETTINGS[difficulty].multiplier)
+  }));
+};
+
+// Achievement categories for different point ranges
+const ACHIEVEMENT_TIERS = {
+  COMMON: 'common',      // 0 - 30,000
+  UNCOMMON: 'uncommon',  // 30,000 - 200,000
+  RARE: 'rare',         // 200,000 - 1,000,000
+  EPIC: 'epic',         // 1,000,000 - 5,000,000
+  LEGENDARY: 'legendary' // 5,000,000+
+};
+
+// Regions for different title ranges
+const TITLE_REGIONS = {
+  'Street Rat of Flea Bottom': "King's Landing",
+  'Merchant of the Free Cities': 'Free Cities',
+  'Captain of the City Watch': "King's Landing",
+  "Night's Watch Recruit": 'The Wall',
+  'Ranger Beyond the Wall': 'Beyond the Wall',
+  'First Ranger': 'The Wall',
+  'Lord Commander': 'The Wall',
+  'Knight of the Seven Kingdoms': 'The Seven Kingdoms',
+  'Lord of a Great House': 'The Seven Kingdoms',
+  'Warden of the Realm': 'The Seven Kingdoms',
+  'Master of Whispers': 'Red Keep',
+  'Master of Ships': 'Red Keep',
+  'Master of Laws': 'Red Keep',
+  'Master of Coin': 'Red Keep',
+  'Hand of the King': 'Red Keep',
+  'Warg of the North': 'The North',
+  'Blood of the Dragon': 'Valyria',
+  'Dragon Rider': 'The Skies of Westeros',
+  'Protector of the Realm': 'The Seven Kingdoms',
+  'King/Queen of the Seven Kingdoms': 'Iron Throne',
+  'Azor Ahai Reborn': 'The Known World',
+  'The Prince/Princess That Was Promised': 'The Realm of Light'
+};
+
 module.exports = {
-  MILESTONES
+  MILESTONES: BASE_MILESTONES,
+  DIFFICULTY_SETTINGS,
+  getMilestonesForDifficulty,
+  ACHIEVEMENT_TIERS,
+  TITLE_REGIONS
 }; 

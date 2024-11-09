@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { MILESTONES } = require('./constants');
+const { MILESTONES, ACHIEVEMENT_TIERS, TITLE_REGIONS, getMilestonesForDifficulty } = require('./constants');
 const { calculateStreak, calculatePoints } = require('./utils');
 
 /**
@@ -8,23 +8,52 @@ const { calculateStreak, calculatePoints } = require('./utils');
 class GameLogger {
   /**
    * @param {string} filePath - Path to the JSON file storing the data
+   * @param {string} difficulty - Difficulty setting
    */
-  constructor(filePath) {
+  constructor(filePath, difficulty = 'DEDICATED') {
     this.filePath = filePath;
+    this.difficulty = difficulty;
   }
 
   /**
-   * Determines user's title based on total points
-   * @param {number} totalPoints - Total points accumulated
-   * @returns {string} - Current title
+   * Gets achievement tier based on points
+   * @param {number} points - Total points
+   * @returns {string} - Achievement tier
    */
-  getTitle(totalPoints) {
-    for (let i = MILESTONES.length - 1; i >= 0; i--) {
-      if (totalPoints >= MILESTONES[i].points) {
-        return MILESTONES[i].title;
+  getAchievementTier(points) {
+    if (points >= 5000000) return ACHIEVEMENT_TIERS.LEGENDARY;
+    if (points >= 1000000) return ACHIEVEMENT_TIERS.EPIC;
+    if (points >= 200000) return ACHIEVEMENT_TIERS.RARE;
+    if (points >= 30000) return ACHIEVEMENT_TIERS.UNCOMMON;
+    return ACHIEVEMENT_TIERS.COMMON;
+  }
+
+  /**
+   * Gets title details including region and tier
+   * @param {number} totalPoints - Total points accumulated
+   * @returns {Object} - Title details
+   */
+  getTitleDetails(totalPoints) {
+    const milestones = getMilestonesForDifficulty(this.difficulty);
+    for (let i = milestones.length - 1; i >= 0; i--) {
+      if (totalPoints >= milestones[i].points) {
+        const title = milestones[i].title;
+        return {
+          title,
+          region: TITLE_REGIONS[title] || 'Unknown Lands',
+          tier: this.getAchievementTier(totalPoints),
+          nextMilestone: milestones[i + 1] || null,
+          pointsToNext: milestones[i + 1] ? milestones[i + 1].points - totalPoints : 0
+        };
       }
     }
-    return "Newcomer";
+    return {
+      title: "Newcomer",
+      region: "Westeros",
+      tier: ACHIEVEMENT_TIERS.COMMON,
+      nextMilestone: milestones[0],
+      pointsToNext: milestones[0].points
+    };
   }
 
   /**
@@ -44,12 +73,47 @@ class GameLogger {
       0
     );
 
+    const titleDetails = this.getTitleDetails(totalPoints);
+
     return {
       streak,
       totalTimeInvested,
       totalPoints,
-      title: this.getTitle(totalPoints)
+      ...titleDetails,
+      progressToNext: titleDetails.nextMilestone ? 
+        ((totalPoints / titleDetails.nextMilestone.points) * 100).toFixed(2) + '%' : 
+        'Maximum Title Achieved!'
     };
+  }
+
+  /**
+   * Validates and converts date to DD/MM/YYYY format
+   * @param {string} date - Date string to validate
+   * @returns {boolean} - Whether the date is valid
+   */
+  isValidDateFormat(date) {
+    // Check for DD/MM/YYYY format
+    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    if (!dateRegex.test(date)) {
+      return false;
+    }
+
+    // Validate the date is real
+    const [day, month, year] = date.split('/').map(Number);
+    const dateObj = new Date(year, month - 1, day);
+    return dateObj.getDate() === day &&
+           dateObj.getMonth() === month - 1 &&
+           dateObj.getFullYear() === year;
+  }
+
+  /**
+   * Converts date from any format to DD/MM/YYYY
+   * @param {string} date - Date string to convert
+   * @returns {string} - Formatted date string
+   */
+  formatDate(date) {
+    const [day, month, year] = date.split('/').map(Number);
+    return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
   }
 
   /**
@@ -62,19 +126,39 @@ class GameLogger {
       if (fs.existsSync(this.filePath)) {
         existingData = this.readGameData() || [];
       }
-      existingData.push(data);
+      
+      // Ensure date is in DD/MM/YYYY format
+      const formattedData = {
+        ...data,
+        date: this.formatDate(data.date)
+      };
+      
+      existingData.push(formattedData);
       const total = this.calculateTotal(existingData);
+      
+      // Check for milestone achievement
+      const previousTotal = this.calculateTotal(existingData.slice(0, -1));
+      const milestoneAchieved = previousTotal.title !== total.title;
       
       fs.writeFileSync(
         this.filePath,
         JSON.stringify({ 
           entries: existingData, 
           total,
-          lastRecalculated: new Date().toISOString()
+          lastRecalculated: new Date().toISOString(),
+          milestoneAchieved,
+          previousTitle: milestoneAchieved ? previousTotal.title : null
         }, null, 2)
       );
+
+      return {
+        ...total,
+        milestoneAchieved,
+        previousTitle: milestoneAchieved ? previousTotal.title : null
+      };
     } catch (error) {
       console.log("error writing data:", error);
+      return null;
     }
   }
 
@@ -82,19 +166,24 @@ class GameLogger {
    * Modifies existing entry in the game data file
    * @param {string} date - Date of entry to modify
    * @param {number} newTimeInMinutes - New time value
+   * @param {boolean} appendTime - Whether to append time to existing entry
    * @returns {boolean} - Success status
    */
-  modifyGameData(date, newTimeInMinutes) {
+  modifyGameData(date, newTimeInMinutes, appendTime = false) {
     try {
-      let existingData = this.readGameData() || [];
-      
-      // Validate date format (DD/MM/YYYY)
-      if (!/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
-        console.log("Invalid date format. Please use DD/MM/YYYY");
+      if (!this.isValidDateFormat(date)) {
+        console.log("\nInvalid date format. Please use DD/MM/YYYY (e.g., 09/11/2024)");
         return false;
       }
 
-      const index = existingData.findIndex(entry => entry.date === date);
+      let existingData = this.readGameData() || [];
+      const formattedDate = this.formatDate(date);
+      const index = existingData.findIndex(entry => {
+        // Convert existing entry dates to DD/MM/YYYY format for comparison
+        const [month, day, year] = entry.date.split('/').map(Number);
+        const entryFormatted = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+        return entryFormatted === formattedDate;
+      });
       
       if (index === -1) {
         console.log("No entry found for the specified date");
@@ -103,19 +192,25 @@ class GameLogger {
 
       // Sort entries chronologically for streak calculation
       existingData.sort((a, b) => {
-        const [dayA, monthA, yearA] = a.date.split('/').map(Number);
-        const [dayB, monthB, yearB] = b.date.split('/').map(Number);
+        const [dayA, monthA, yearA] = this.formatDate(a.date).split('/').map(Number);
+        const [dayB, monthB, yearB] = this.formatDate(b.date).split('/').map(Number);
         return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
       });
 
-      const streak = calculateStreak(existingData);
-      const points = calculatePoints(Number(newTimeInMinutes), streak);
+      const finalTime = appendTime ? 
+        existingData[index].timeInvested + Number(newTimeInMinutes) : 
+        Number(newTimeInMinutes);
 
+      const streakInfo = calculateStreak(existingData);
+      const pointsBreakdown = calculatePoints(finalTime, streakInfo);
+
+      // Update the entry with the new format
       existingData[index] = {
-        date,
-        streak,
-        points,
-        timeInvested: Number(newTimeInMinutes)
+        date: formattedDate,
+        streak: streakInfo.currentStreak,
+        points: pointsBreakdown.totalPoints,
+        timeInvested: finalTime,
+        breakdown: pointsBreakdown // Store point breakdown for reference
       };
 
       const total = this.calculateTotal(existingData);
@@ -228,6 +323,27 @@ class GameLogger {
       console.log("error recalculating data:", error);
       return false;
     }
+  }
+
+  /**
+   * Gets progress details for current title
+   * @returns {Object} Progress information
+   */
+  getProgressDetails() {
+    const data = this.readGameData() || [];
+    const total = this.calculateTotal(data);
+    const titleDetails = this.getTitleDetails(total.totalPoints);
+
+    return {
+      currentTitle: titleDetails.title,
+      region: titleDetails.region,
+      tier: titleDetails.tier,
+      nextTitle: titleDetails.nextMilestone?.title || 'Maximum Title Achieved',
+      pointsToNext: titleDetails.pointsToNext,
+      progressPercentage: ((total.totalPoints / (titleDetails.nextMilestone?.points || total.totalPoints)) * 100).toFixed(2),
+      totalPoints: total.totalPoints,
+      streak: total.streak
+    };
   }
 }
 

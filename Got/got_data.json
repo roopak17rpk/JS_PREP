@@ -1,24 +1,17 @@
 {
   "entries": [
     {
-      "date": "10/9/2024",
+      "date": "09/11/2024",
       "streak": 1,
-      "points": 975,
-      "timeInvested": 240
-    },
-    {
-      "date": "11/9/2024",
-      "streak": 2,
-      "points": 1370,
-      "timeInvested": 240
+      "points": 56,
+      "timeInvested": 30
     }
   ],
   "total": {
-    "streak": 2,
-    "totalTimeInvested": 480,
-    "totalPoints": 2345,
-    "title": "Ranger of the Watch"
+    "streak": 1,
+    "totalTimeInvested": 30,
+    "totalPoints": 56,
+    "title": "Newcomer"
   },
-  "lastRecalculated": "2024-11-09T12:21:31.502Z",
-  "entriesFixed": 1
+  "lastRecalculated": "2024-11-09T13:21:22.059Z"
 }
