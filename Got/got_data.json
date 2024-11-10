@@ -2,24 +2,24 @@
   "entries": [
     {
       "date": "10/11/2024",
-      "streak": 0,
-      "points": 11,
-      "timeInvested": 11
+      "streak": 1,
+      "points": 802,
+      "timeInvested": 262
     }
   ],
   "total": {
-    "streak": 0,
-    "totalTimeInvested": 11,
-    "totalPoints": 11,
-    "title": "Newcomer",
-    "region": "Westeros",
+    "streak": 1,
+    "totalTimeInvested": 262,
+    "totalPoints": 802,
+    "title": "Street Rat of Flea Bottom",
+    "region": "King's Landing",
     "tier": "common",
     "nextMilestone": {
-      "points": 540,
-      "title": "Street Rat of Flea Bottom"
+      "points": 1260,
+      "title": "Merchant of the Free Cities"
     },
-    "pointsToNext": 540,
-    "progressToNext": "2.04%"
+    "pointsToNext": 458,
+    "progressToNext": "63.65%"
   },
-  "lastRecalculated": "2024-11-10T04:31:50.831Z"
+  "lastRecalculated": "2024-11-10T17:34:10.208Z"
 }
