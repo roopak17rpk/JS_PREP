@@ -1,7 +1,12 @@
 const readline = require("readline");
 const GameLogger = require("./GameLogger");
 const { calculateStreak, calculatePoints } = require("./utils");
-const { DIFFICULTY_SETTINGS } = require("./constants");
+const { 
+  MILESTONES, 
+  DIFFICULTY_SETTINGS, 
+  getMilestonesForDifficulty, 
+  TITLE_REGIONS 
+} = require('./constants');
 const state = require('./state');
 const config = require('./config');
 const audioManager = require('./audioManager');
@@ -676,12 +681,13 @@ function displayMilestonesProgress() {
   const logger = new GameLogger("got_data.json");
   const data = logger.readGameData();
   const total = logger.calculateTotal(data);
-  const milestones = getMilestonesForDifficulty(currentDifficulty);
+  const milestones = getMilestonesForDifficulty(state.currentDifficulty);
 
   console.log("\n=== Your Path to Glory ===");
   console.log(ASCII_ART.throne);
   console.log(`\nCurrent Title: ${total.title}`);
   console.log(`Total Points: ${total.totalPoints}`);
+  console.log(`Current Difficulty: ${DIFFICULTY_SETTINGS[state.currentDifficulty].name}`);
   console.log("\nMilestone Progress:\n");
 
   let foundCurrent = false;
@@ -689,7 +695,8 @@ function displayMilestonesProgress() {
     const nextMilestone = milestones[index + 1];
     const progress = (total.totalPoints / milestone.points) * 100;
     const isCurrentTitle = milestone.title === total.title;
-    const progressBar = createProgressBar(progress);
+    const isAchieved = total.totalPoints >= milestone.points;
+    const progressBar = createProgressBar(progress > 100 ? 100 : progress);
     
     if (isCurrentTitle) {
       foundCurrent = true;
@@ -702,10 +709,10 @@ function displayMilestonesProgress() {
       } else {
         console.log("  Maximum Title Achieved!");
       }
-    } else if (!foundCurrent) {
+    } else if (!foundCurrent && isAchieved) {
       console.log(`✓ ${milestone.title} [ACHIEVED]`);
       console.log(`  ${progressBar} 100%`);
-    } else if (foundCurrent) {
+    } else {
       const pointsNeeded = milestone.points - total.totalPoints;
       const currentProgress = (total.totalPoints / milestone.points) * 100;
       console.log(`○ ${milestone.title} [LOCKED]`);

@@ -61,7 +61,11 @@ const BASE_MILESTONES = [
   { points: TYPICAL_SESSION_POINTS.MIN * 300, title: "The Prince/Princess That Was Promised" }
 ];
 
-// Function to get milestones based on difficulty
+/**
+ * Gets milestones based on difficulty setting
+ * @param {string} difficulty - Difficulty level
+ * @returns {Array} - Array of milestones with adjusted points
+ */
 const getMilestonesForDifficulty = (difficulty) => {
   return BASE_MILESTONES.map(milestone => ({
     ...milestone,
@@ -108,6 +112,6 @@ module.exports = {
   MILESTONES: BASE_MILESTONES,
   DIFFICULTY_SETTINGS,
   getMilestonesForDifficulty,
-  ACHIEVEMENT_TIERS,
-  TITLE_REGIONS
+  TITLE_REGIONS,
+  ACHIEVEMENT_TIERS
 }; 
