@@ -145,14 +145,15 @@ ${getRandomArt()}
   console.log("4. Summon the Three-Eyed Raven (Recalculate)");
   console.log("5. Change Difficulty");
   console.log("6. Toggle Music");
-  console.log("7. Exit the Realm");
+  console.log("7. View Milestones Progress");
+  console.log("8. Exit the Realm");
   console.log("=====================================\n");
 
   askForChoice();
 }
 
 function askForChoice() {
-  rl.question("What is your command? (1-7): ", handleChoice);
+  rl.question("What is your command? (1-8): ", handleChoice);
 }
 
 function isValidDateFormat(date) {
@@ -180,17 +181,25 @@ function handleInvalidChoice() {
 function handleChoice(choice) {
   const logger = new GameLogger("got_data.json", state.currentDifficulty);
 
-  if (!["1", "2", "3", "4", "5", "6", "7"].includes(choice)) {
+  if (!["1", "2", "3", "4", "5", "6", "7", "8"].includes(choice)) {
     handleInvalidChoice();
     return;
   }
 
-  if (choice === "7") {
+  if (choice === "8") {
     console.log("\nFarewell, until we meet again...");
     if (state.currentAudio) {
       state.currentAudio.kill();
     }
     rl.close();
+    return;
+  }
+
+  if (choice === "7") {
+    displayMilestonesProgress();
+    rl.question("\nPress Enter to return to the main menu...", () => {
+      displayMenu();
+    });
     return;
   }
 
@@ -661,4 +670,55 @@ ${ASCII_ART.sword}
       });
     }
   });
+}
+
+function displayMilestonesProgress() {
+  const logger = new GameLogger("got_data.json");
+  const data = logger.readGameData();
+  const total = logger.calculateTotal(data);
+  const milestones = getMilestonesForDifficulty(currentDifficulty);
+
+  console.log("\n=== Your Path to Glory ===");
+  console.log(ASCII_ART.throne);
+  console.log(`\nCurrent Title: ${total.title}`);
+  console.log(`Total Points: ${total.totalPoints}`);
+  console.log("\nMilestone Progress:\n");
+
+  let foundCurrent = false;
+  milestones.forEach((milestone, index) => {
+    const nextMilestone = milestones[index + 1];
+    const progress = (total.totalPoints / milestone.points) * 100;
+    const isCurrentTitle = milestone.title === total.title;
+    const progressBar = createProgressBar(progress);
+    
+    if (isCurrentTitle) {
+      foundCurrent = true;
+      console.log(`► ${milestone.title} [CURRENT]`);
+      if (nextMilestone) {
+        const pointsNeeded = nextMilestone.points - total.totalPoints;
+        const progressToNext = (total.totalPoints / nextMilestone.points) * 100;
+        console.log(`  Progress to next: ${progressBar} ${progressToNext.toFixed(1)}%`);
+        console.log(`  Points needed: ${pointsNeeded}`);
+      } else {
+        console.log("  Maximum Title Achieved!");
+      }
+    } else if (!foundCurrent) {
+      console.log(`✓ ${milestone.title} [ACHIEVED]`);
+      console.log(`  ${progressBar} 100%`);
+    } else if (foundCurrent) {
+      const pointsNeeded = milestone.points - total.totalPoints;
+      const currentProgress = (total.totalPoints / milestone.points) * 100;
+      console.log(`○ ${milestone.title} [LOCKED]`);
+      console.log(`  Progress: ${progressBar} ${currentProgress.toFixed(1)}%`);
+      console.log(`  Points needed: ${pointsNeeded}`);
+    }
+    console.log(); // Empty line for spacing
+  });
+}
+
+function createProgressBar(percentage) {
+  const width = 20;
+  const filled = Math.floor((percentage / 100) * width);
+  const empty = width - filled;
+  return `[${'█'.repeat(filled)}${'-'.repeat(empty)}]`;
 }
