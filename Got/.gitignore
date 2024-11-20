@@ -1,7 +1,0 @@
-# Only exclude node_modules directory
-node_modules/
-
-# Keep these files tracked
-# !config.json
-# !got_data.json
-# !*.mp3
