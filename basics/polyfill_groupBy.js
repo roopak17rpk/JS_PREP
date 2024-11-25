@@ -19,3 +19,9 @@ const grouped = exampleArray.reduce((acc, curr) => {
 }, {});
 
 console.log("grouped", grouped);
+
+
+
+
+
+
