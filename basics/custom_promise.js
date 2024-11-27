@@ -25,7 +25,7 @@ class MyPromise {
   #runCallbacks() {
     if (this.#state === STATE.FULFILLED) {
       this.#thenCbs.forEach((callback) => {
-        callback.apply(this.#value);
+        callback(this.#value);
       });
 
       // if we have p.then(); p.then(); then i dont want to call first .then() so we are
@@ -35,7 +35,7 @@ class MyPromise {
 
     if (this.#state === STATE.FAILED) {
       this.#catchCbs.forEach((callback) => {
-        callback.apply(this.#value);
+        callback(this.#value);
       });
       this.#catchCbs = [];
     }
@@ -88,7 +88,7 @@ class MyPromise {
   then(thenCb, catchCb) {
     return new MyPromise((resolve, reject) => {
       this.#thenCbs.push((result) => {
-        if (!thenCb) {
+        if (thenCb == null) {
           resolve(result);
           return;
         }
@@ -103,8 +103,8 @@ class MyPromise {
       // if (!!catchCb) this.#catchCbs.push(cb);
 
       this.#catchCbs.push((result) => {
-        if (!catchCb) {
-          resolve(result);
+        if (catchCb == null) {
+          reject(result);
           return;
         }
 
@@ -165,3 +165,13 @@ class UncaughtPromiseError extends Error {
     this.stack = `in Promise ${error} \n ${this.stack}`;
   }
 }
+
+const promise3 = MyPromise.resolve(1);
+promise3
+  .then((value) => value + 1)
+  .then((value) => value * 2)
+  .then((value) => {
+    console.log("Test Case 3 Result:", value);
+  });
+
+module.exports = MyPromise;
