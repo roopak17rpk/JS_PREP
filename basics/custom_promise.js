@@ -17,7 +17,7 @@ class MyPromise {
       cb(this.#onSuccessBind, this.#onFailBind);
     } catch (e) {
       // any error in promise happens .catch is immediately called.
-      this.#onFail(e);
+      this.#onFailBind(e);
     }
   }
 
@@ -128,7 +128,7 @@ class MyPromise {
   }
 
   catch(cb) {
-    this.then(undefined, cb);
+    return this.then(undefined, cb);
   }
   finally(cb) {
     // execute finally callback and return the last result
@@ -173,5 +173,45 @@ promise3
   .then((value) => {
     console.log("Test Case 3 Result:", value);
   });
+
+const customPromise = (delay) => {
+  return new MyPromise((resolve, reject) => {
+    setTimeout(() => {
+      if (delay === 1500) {
+        reject(`rejected ${delay}`);
+        return;
+      }
+      resolve(`resolved ${delay}`);
+    }, delay);
+  });
+};
+
+const showResult = async () => {
+  const res = await customPromise(2000);
+  console.log(res, "res");
+};
+
+// customPromise(2000).then((value) => {
+//   console.log(value);
+// });
+// showResult();
+
+const testPromises = async () => {
+  try {
+    const res1 = await customPromise(1500);
+    console.log("res1", res1);
+  } catch (error) {
+    console.log("error1", error);
+  }
+
+  try {
+    const res2 = await customPromise(2000);
+    console.log("res2", res2);
+  } catch (error) {
+    console.log("error2", error);
+  }
+};
+
+testPromises();
 
 module.exports = MyPromise;

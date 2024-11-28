@@ -5,7 +5,7 @@ const FlattenObj = (obj) => {
     for (let key in obj) {
       const newParent = parent + key;
       const value = obj[key];
-      if (typeof value === "object") {
+      if (value !== null && typeof value === "object") {
         generateFlattenObj(value, newParent + ".");
       } else {
         finalObj[newParent] = value;
@@ -38,6 +38,7 @@ const nestedObject = {
       degree: "Computer Science",
     },
   },
+  summy: null,
 };
 
 const flattenObject = FlattenObj(nestedObject);
