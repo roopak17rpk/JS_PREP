@@ -16,3 +16,45 @@ const allSettled = (promises) => {
   // run all the promises once with .all
   return Promise.all(mappedPromises);
 };
+
+Promise.myAllSettled = function (taskList) {
+  return new Promise((resolve, reject) => {
+    const result = [];
+    let completedPromise = 0;
+    taskList.forEach((task, i) => {
+      Promise.resolve(task)
+        .then((value) => {
+          result[i] = { status: "fulfilled", value: value };
+        })
+        .catch((err) => {
+          result[i] = { status: "failed", value: err };
+        })
+        .finally(() => {
+          completedPromise++;
+          if (completedPromise === taskList?.length) {
+            resolve(result);
+          }
+        });
+    });
+  });
+};
+
+const customTask = (delay) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (delay === 2000) {
+        reject(`reject ${delay}`);
+      }
+      resolve(`resolve ${delay}`);
+    }, delay);
+  });
+};
+
+const taskList = [customTask(1000), customTask(2000), customTask(3000)];
+
+const showResult = async () => {
+  const res = await Promise.myAllSettled(taskList);
+  console.log("res", res);
+};
+
+showResult();
