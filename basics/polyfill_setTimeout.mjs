@@ -4,13 +4,13 @@ export function createTimeout() {
 
   const requestIdleCallback = setImmediate;
 
-  function setTimeoutPoly(callback, delay) {
+  function setTimeoutPoly(callback, delay, ...args) {
     let id = timerId++;
     timerMap[id] = true;
 
     let start = Date.now();
 
-    function triggerCallback(args) {
+    function triggerCallback() {
       if (!timerMap[id]) return;
       if (Date.now() - start >= delay) {
         callback.apply(this, args);
