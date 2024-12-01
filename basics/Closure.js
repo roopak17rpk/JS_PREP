@@ -19,7 +19,7 @@ function outer() {
     return sum;
   }
 
-  return inner;
+  return inner;  
 }
 
 const x = outer();
