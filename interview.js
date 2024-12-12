@@ -6,7 +6,7 @@ const arr = [1, 2, 3, 4, 5];
 for (var i = 0; i < arr.length; i++) {
   setTimeout(() => {
     console.log(arr[i]);
-  });
+  }, 3000);
 }
 
 /**
@@ -47,7 +47,6 @@ function B() {
 A();
 B();
 console.log("Global call");
-
 
 /** make undo / redo
  * start by asking debouncing and give debouncing code
