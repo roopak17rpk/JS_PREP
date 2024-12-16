@@ -27,6 +27,22 @@
  * console.log("original.b.c", original.b.c); // Outputs: 3
  */
 
+/**
+ * one issue with JSON.stringify is that it will not copy functions
+ * it will drop them
+ * it happens because while serializing the data if function is serialized too
+ * it creates a security hazard as that function can be changed.
+ * so to prevent this functions are not serilized.
+ *
+ * in JSON only these data types can be there
+ *    1.)Number
+ *    2.)String
+ *    3.)Boolean
+ *    4.)Array
+ *    5.)Object
+ *    6.)null
+ */
+
 // Example implementation
 const shallowCopyExample = () => {
   const original = { a: 1, b: { c: 2 } };
