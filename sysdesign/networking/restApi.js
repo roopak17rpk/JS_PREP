@@ -148,6 +148,132 @@ app.delete("/todos/:id", (req, res) => {
  * AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36
  *
  * Accept ---> Response content --> application/json ,application/xml
- * 
+ *
  * accept-language ---> language pref ----> en-USq=0.9 (0.9 is priority if there are other languages)
+ *
+ * accept-encoding ---> encoding pref ----> gzip, deflate, br(brotli compression)
+ * (implicitly done by browser, gziping and deflating the response).
+ *
+ * connection ---> keep-alive, close (keep-alive : keep the connection open for multiple requests,
+ * close : close the connection after the request is done)
+ *
+ * Authorization ---> Send Credentials ----> Bearer 1234567890
+ *
+ * cookie ---> sessionId=1234567890(previous server token can be resend)---> Key - Value
+ *
+ *
+ */
+
+/**
+ * Response Headers
+ *
+ * Date ---> Date and time when the response was generated ----> Fri, 20 Dec 2024 10:10:10 GMT
+ *
+ * server ---> server info ----> Apache/2.4.41 (Unix) remove this status cause of security reasons
+ *
+ * content-type ---> content type of the response ----> application/json
+ *
+ * content-length ---> length of the response body in bytes ----> 100 bytes
+ * (in downloading file i can show the progress percentage)
+ *
+ * set-cookie ---> informs about the cookie need to store for future response---> Key - Value
+ *
+ */
+
+/**
+ * HTTP Status Codes Guide
+ * 
+ * 1xx - Informational Responses
+ * -----------------------------
+ * 100 Continue
+ * - Server received request headers and client should proceed with request body
+ * - Example: Large file upload where server confirms it's ready to receive data
+ * 
+ * 101 Switching Protocols  
+ * - Server agrees to switch protocols (e.g., HTTP to WebSocket)
+ * - Example: WebSocket handshake for real-time chat applications
+ * 
+ * 2xx - Successful Responses
+ * -------------------------
+ * 200 OK
+ * - Request succeeded
+ * - Example: Successful GET request for user profile data
+ * 
+ * 201 Created
+ * - Resource successfully created
+ * - Example: New user registration, creating blog post
+ * 
+ * 202 Accepted
+ * - Request accepted but processing not completed
+ * - Example: Batch processing jobs, email scheduling
+ * 
+ * 204 No Content
+ * - Success but no content to return
+ * - Example: DELETE operations, updating user preferences
+ * 
+ * 206 Partial Content
+ * - Partial resource returned
+ * - Example: Video streaming, large file downloads with resume capability
+ * 
+ * 3xx - Redirection
+ * ----------------
+ * 301 Moved Permanently
+ * - Resource permanently moved to new URL
+ * - Example: Website domain change, permanent URL restructuring
+ * 
+ * 302 Found (Temporary Redirect)
+ * - Resource temporarily at different URL
+ * - Example: A/B testing, maintenance page redirect
+ * 
+ * 307 Temporary Redirect
+ * - Same as 302 but maintains HTTP method
+ * - Example: Load balancing, temporary routing
+ * 
+ * 308 Permanent Redirect
+ * - Same as 301 but maintains HTTP method
+ * - Example: API version migration
+ * 
+ * 4xx - Client Errors
+ * ------------------
+ * 400 Bad Request
+ * - Invalid syntax or parameters
+ * - Example: Invalid JSON format, missing required fields
+ * 
+ * 401 Unauthorized
+ * - Authentication required
+ * - Example: Accessing protected API endpoints without token
+ * 
+ * 403 Forbidden
+ * - Client lacks permissions
+ * - Example: Regular user accessing admin features
+ * 
+ * 404 Not Found
+ * - Resource doesn't exist
+ * - Example: Accessing deleted content, mistyped URLs
+ * 
+ * 405 Method Not Allowed
+ * - HTTP method not supported
+ * - Example: POST request to GET-only endpoint
+ * 
+ * 5xx - Server Errors
+ * ------------------
+ * 500 Internal Server Error
+ * - Unexpected server condition
+ * - Example: Unhandled exceptions, database connection failures
+ * 
+ * 502 Bad Gateway
+ * - Invalid response from upstream server
+ * - Example: Microservice communication failure
+ * 
+ * 503 Service Unavailable
+ * - Server temporarily unable to handle request
+ * - Example: Server maintenance, rate limiting
+ * 
+ * 504 Gateway Timeout
+ * - Upstream server didn't respond in time
+ * - Example: Database query timeout, third-party API timeout
+ * 
+ * 507 Insufficient Storage
+ * - Server out of storage space
+ * - Example: File upload server at capacity
  */
