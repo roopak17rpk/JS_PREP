@@ -1,12 +1,3 @@
-const res = {
-  statusCode: null,
-  setStatusCode: function (statusCode) {
-    this.statusCode = statusCode;
-    return this;
-  },
-  getStatusCode: function () {
-    return this.statusCode;
-  },
-};
+const arr = [-2, -4];
 
-console.log(res.setStatusCode(200).getStatusCode());
+console.log(Math.max(...arr));
