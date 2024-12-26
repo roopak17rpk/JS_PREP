@@ -10,7 +10,7 @@
  * and choosing a different day in future to sell the stock
  * return the maximum profit, if u cannot acheive any profit return 0
  *
- * prices = [7,1,5,3,6,4]; ----->>>>> output: 6;
+ * prices = [7,1,5,3,6,4]; ----->>>>> output: 5;
  * prices = [7,6,4,3,1]; ----->>>>> output: 0;
  */
 
