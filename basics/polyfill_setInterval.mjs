@@ -10,6 +10,9 @@ function createInterval() {
     let id = intervalId++;
 
     function reIterate() {
+      if (!intervalMap[id]) {
+        return; // Stop if interval has been cleared
+      }
       intervalMap[id] = setTimeoutPoly((args) => {
         callback.apply(this, args);
         reIterate();
