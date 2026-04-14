@@ -8,12 +8,13 @@ A deep dive into what happens from the moment you type a URL into your browser u
 
 The web operates on a **client-server model**. The client (your browser) sends a **request** and the server sends back a **response**.
 
-```mermaid
-sequenceDiagram
-    participant Client as 🖥️ Client (Browser)
-    participant Server as 🗄️ Server
-    Client->>Server: HTTP Request (e.g., GET /index.html)
-    Server-->>Client: HTTP Response (HTML, CSS, JS, etc.)
+```
+    Client (Browser)                                Server
+         |                                            |
+         |   ---- HTTP Request (GET /index.html) -->  |
+         |                                            |
+         |   <-- HTTP Response (HTML, CSS, JS) -----  |
+         |                                            |
 ```
 
 ### What is a Server?
@@ -42,9 +43,9 @@ A domain name like `www.google.com` is broken into hierarchical parts:
 
 ```
 www.google.com.
- │    │     │  └── Root Domain (implicit, usually hidden)
- │    │     └───── Top-Level Domain (TLD): .com, .org, .io
- │    └─────────── Second-Level Domain (SLD): google
+ |    |     |  └── Root Domain (implicit, usually hidden)
+ |    |     └───── Top-Level Domain (TLD): .com, .org, .io
+ |    └─────────── Second-Level Domain (SLD): google
  └──────────────── Third-Level Domain (subdomain): www
 ```
 
@@ -61,28 +62,36 @@ www.google.com.
 
 When you type `google.com` in your browser, a chain of lookups happens to resolve it into an IP address.
 
-```mermaid
-sequenceDiagram
-    participant Browser as 🖥️ Browser
-    participant OS as 💻 OS Cache
-    participant Router as 📡 Router
-    participant ISP as 🏢 ISP DNS
-    participant Root as 🌐 Root DNS
-    participant TLD as 📁 TLD DNS (.com)
-    participant Auth as 🗄️ Authoritative DNS
-
-    Browser->>OS: Do you have google.com cached?
-    OS-->>Browser: No
-    Browser->>Router: Do you have google.com cached?
-    Router-->>Browser: No
-    Browser->>ISP: Resolve google.com
-    ISP->>Root: Where is .com?
-    Root-->>ISP: Ask the .com TLD server
-    ISP->>TLD: Where is google.com?
-    TLD-->>ISP: Ask Google's authoritative DNS
-    ISP->>Auth: What is the IP for google.com?
-    Auth-->>ISP: 142.250.190.46
-    ISP-->>Browser: 142.250.190.46
+```
+  Browser       OS Cache      Router       ISP DNS      Root DNS     TLD DNS     Auth DNS
+    |               |            |            |             |            |            |
+    |--"google.com  |            |            |             |            |            |
+    |   cached?"-->|            |            |             |            |            |
+    |               |            |            |             |            |            |
+    |<--"No"--------|            |            |             |            |            |
+    |               |            |            |             |            |            |
+    |--"google.com cached?"---->|            |             |            |            |
+    |               |            |            |             |            |            |
+    |<--"No"----------------------|            |             |            |            |
+    |               |            |            |             |            |            |
+    |--"Resolve google.com"------------------>|             |            |            |
+    |               |            |            |             |            |            |
+    |               |            |            |--"Where     |            |            |
+    |               |            |            |  is .com?"->|            |            |
+    |               |            |            |             |            |            |
+    |               |            |            |<-"Ask the   |            |            |
+    |               |            |            |  .com TLD"--|            |            |
+    |               |            |            |             |            |            |
+    |               |            |            |--"Where is google.com?"->|            |
+    |               |            |            |             |            |            |
+    |               |            |            |<-"Ask Google's Auth DNS"-|            |
+    |               |            |            |             |            |            |
+    |               |            |            |--"IP for google.com?"--------------->|
+    |               |            |            |             |            |            |
+    |               |            |            |<-"142.250.190.46"----------------------|
+    |               |            |            |             |            |            |
+    |<--"142.250.190.46"----------------------|             |            |            |
+    |               |            |            |             |            |            |
 ```
 
 ### DNS Resolution Steps
@@ -103,19 +112,23 @@ sequenceDiagram
 
 Once the browser has the IP address, it needs to establish a reliable connection with the server. This is done using the **TCP three-way handshake**.
 
-```mermaid
-sequenceDiagram
-    participant Client as 🖥️ Client
-    participant Server as 🗄️ Server
-
-    Note over Client,Server: TCP Three-Way Handshake
-    Client->>Server: SYN (Can I connect?)
-    Server-->>Client: SYN + ACK (Yes, and I acknowledge)
-    Client->>Server: ACK (Connection established!)
-
-    Note over Client,Server: Data Transfer Begins
-    Client->>Server: HTTP Request (GET /index.html)
-    Server-->>Client: HTTP Response (HTML content)
+```
+    Client                                          Server
+      |                                               |
+      |   ===== TCP Three-Way Handshake =====         |
+      |                                               |
+      |   ---- SYN (Can I connect?) -------------->   |
+      |                                               |
+      |   <--- SYN+ACK (Yes, and I acknowledge) ---   |
+      |                                               |
+      |   ---- ACK (Connection established!) ----->   |
+      |                                               |
+      |   ===== Data Transfer Begins =====            |
+      |                                               |
+      |   ---- HTTP Request (GET /index.html) ---->   |
+      |                                               |
+      |   <--- HTTP Response (HTML content) -------   |
+      |                                               |
 ```
 
 | Step | Packet | Purpose |
@@ -132,21 +145,28 @@ After the handshake, data flows in both directions over this reliable connection
 
 For secure websites (HTTPS), an additional **TLS handshake** happens after TCP, but before any HTTP data is exchanged.
 
-```mermaid
-sequenceDiagram
-    participant Client as 🖥️ Client
-    participant Server as 🗄️ Server
-
-    Note over Client,Server: After TCP Handshake...
-
-    Client->>Server: ClientHello (supported ciphers, TLS version)
-    Server-->>Client: ServerHello (chosen cipher, TLS certificate)
-    Client->>Client: Verify certificate with Certificate Authority
-    Client->>Server: Key exchange (pre-master secret)
-    Server-->>Client: Finished (encrypted)
-    Client->>Server: Finished (encrypted)
-
-    Note over Client,Server: 🔒 Encrypted HTTP communication begins
+```
+    Client                                          Server
+      |                                               |
+      |   (After TCP Handshake...)                     |
+      |                                               |
+      |   ---- ClientHello ----------------------->   |
+      |   (supported ciphers, TLS version)             |
+      |                                               |
+      |   <--- ServerHello ------------------------   |
+      |        (chosen cipher, TLS certificate)        |
+      |                                               |
+      |   [Client verifies certificate                 |
+      |    with Certificate Authority]                 |
+      |                                               |
+      |   ---- Key exchange (pre-master secret) --->   |
+      |                                               |
+      |   <--- Finished (encrypted) ---------------   |
+      |   ---- Finished (encrypted) -------------->   |
+      |                                               |
+      |   =========================================   |
+      |     Encrypted HTTP communication begins        |
+      |   =========================================   |
 ```
 
 ### Full Connection Sequence for HTTPS
@@ -155,18 +175,10 @@ sequenceDiagram
 DNS Lookup → TCP Handshake → TLS/SSL Handshake → HTTP Request/Response
 ```
 
-```mermaid
-flowchart LR
-    A[DNS Lookup] --> B[TCP Handshake]
-    B --> C[TLS/SSL Handshake]
-    C --> D[HTTP Request Sent]
-    D --> E[HTTP Response Received]
-
-    style A fill:#4ecdc4,color:#000
-    style B fill:#45b7d1,color:#000
-    style C fill:#f9ca24,color:#000
-    style D fill:#f0932b,color:#000
-    style E fill:#6ab04c,color:#000
+```
+  +------------+     +---------------+     +-------------------+     +--------------+     +----------------+
+  | DNS Lookup | --> | TCP Handshake | --> | TLS/SSL Handshake | --> | HTTP Request | --> | HTTP Response  |
+  +------------+     +---------------+     +-------------------+     +--------------+     +----------------+
 ```
 
 ---
@@ -223,37 +235,22 @@ After receiving the HTML, the browser discovers `<link>`, `<script>`, and `<img>
 
 Browsers limit the number of **simultaneous connections** per domain — typically **6 to 8** connections in parallel. Any additional requests are **queued** and wait for a connection to free up.
 
-```mermaid
-gantt
-    title Browser Parallel Resource Fetching (6 connection limit)
-    dateFormat X
-    axisFormat %s
+```
+  Browser Parallel Resource Fetching (6 connection limit)
+  =========================================================
 
-    section Connection 1
-    styles.css          :0, 3
-    image3.png          :3, 6
-
-    section Connection 2
-    app.js              :0, 4
-    image4.png          :4, 7
-
-    section Connection 3
-    vendor.js           :0, 5
-
-    section Connection 4
-    image1.png          :0, 2
-    font.woff2          :2, 5
-
-    section Connection 5
-    image2.png          :0, 3
-    analytics.js        :3, 4
-
-    section Connection 6
-    favicon.ico         :0, 1
-    image5.png          :1, 4
-
-    section Queued
-    image6.png          :4, 7
+  Time -->        0s    1s    2s    3s    4s    5s    6s    7s
+                  |     |     |     |     |     |     |     |
+  Connection 1:   [===== styles.css =====][==== image3.png ====]
+  Connection 2:   [======= app.js ========][=== image4.png ====]
+  Connection 3:   [========= vendor.js =========]
+  Connection 4:   [= image1.png =][==== font.woff2 ====]
+  Connection 5:   [===== image2.png =====][ana.js]
+  Connection 6:   [ico][===== image5.png =====]
+                                          |
+  Queued:                                 [==== image6.png ====]
+                                          ^ waits for a free
+                                            connection slot
 ```
 
 > **Tip:** This is why techniques like **domain sharding**, **HTTP/2 multiplexing**, and **bundling** exist — to work around or eliminate this connection limit.
@@ -284,20 +281,14 @@ In the DevTools Network tab, service-worker-served requests show timing info:
 
 Once resources start arriving, the browser begins rendering. This is a multi-stage pipeline:
 
-```mermaid
-flowchart LR
-    A[Loading] --> B[Scripting]
-    B --> C[Rendering]
-    C --> D[Painting]
-    D --> E[Compositing]
-    E --> F[Displaying]
+```
+  The Critical Rendering Path
+  ============================
 
-    style A fill:#e74c3c,color:#fff
-    style B fill:#e67e22,color:#fff
-    style C fill:#f1c40f,color:#000
-    style D fill:#2ecc71,color:#fff
-    style E fill:#3498db,color:#fff
-    style F fill:#9b59b6,color:#fff
+  Loading --> Scripting --> Rendering --> Painting --> Compositing --> Displaying
+    |            |             |             |              |              |
+  Download    Execute       Build         Fill in        Merge         Send to
+  resources   JS code      layout        pixels         layers        screen
 ```
 
 ### Step-by-Step Breakdown
@@ -308,18 +299,21 @@ flowchart LR
 
 The browser parses the HTML and builds the **DOM (Document Object Model)** — a tree representation of every element on the page.
 
-```mermaid
-graph TD
-    A[document] --> B[html]
-    B --> C[head]
-    B --> D[body]
-    C --> E["link (stylesheet)"]
-    C --> F["script (app.js)"]
-    D --> G[div.container]
-    G --> H[h1]
-    G --> I[p]
-    H --> J["'Hello World'"]
-    I --> K["'Welcome to my site'"]
+```
+  DOM Tree
+  =========
+
+  document
+    └── html
+          ├── head
+          │     ├── link (stylesheet)
+          │     └── script (app.js)
+          └── body
+                └── div.container
+                      ├── h1
+                      │   └── "Hello World"
+                      └── p
+                          └── "Welcome to my site"
 ```
 
 ```html
@@ -344,12 +338,15 @@ graph TD
 
 The browser parses CSS files and constructs the **CSSOM (CSS Object Model)** — a tree of all styles that apply to each element.
 
-```mermaid
-graph TD
-    A[CSSOM Root] --> B["body { font: 16px Arial }"]
-    B --> C[".container { max-width: 1200px }"]
-    C --> D["h1 { color: #333, font-size: 2em }"]
-    C --> E["p { color: #666, line-height: 1.6 }"]
+```
+  CSSOM Tree
+  ===========
+
+  CSSOM Root
+    └── body { font: 16px Arial }
+          └── .container { max-width: 1200px }
+                ├── h1 { color: #333; font-size: 2em }
+                └── p  { color: #666; line-height: 1.6 }
 ```
 
 > **Render-blocking:** CSS is render-blocking. The browser will **not render anything** until the CSSOM is fully constructed. There's no point building the render tree without knowing what styles to apply.
@@ -365,18 +362,11 @@ While parsing HTML, when the browser encounters a `<script>` tag:
 3. The code is **compiled into bytecode** by the JS engine (V8, SpiderMonkey, etc.)
 4. **Execution** happens
 
-```mermaid
-flowchart LR
-    A[Script Downloaded] --> B[Parsing]
-    B --> C[AST Generation]
-    C --> D[Bytecode Compilation]
-    D --> E[Execution]
+```
+  JavaScript Processing Pipeline
+  ================================
 
-    style A fill:#e74c3c,color:#fff
-    style B fill:#e67e22,color:#fff
-    style C fill:#f1c40f,color:#000
-    style D fill:#2ecc71,color:#fff
-    style E fill:#3498db,color:#fff
+  Script Downloaded --> Parsing --> AST Generation --> Bytecode Compilation --> Execution
 ```
 
 > **Parser-blocking:** JavaScript blocks HTML parsing because JS can modify the DOM (e.g., `document.write()`). Use `async` or `defer` to make scripts non-blocking.
@@ -392,28 +382,29 @@ flowchart LR
 <script src="app.js" async></script>
 ```
 
-```mermaid
-gantt
-    title Script Loading Strategies
-    dateFormat X
-    axisFormat %s
+### Script Loading Strategies Compared
 
-    section Normal
-    HTML Parsing     :a1, 0, 3
-    Script Download  :a2, 3, 5
-    Script Execute   :a3, 5, 6
-    HTML Parsing     :a4, 6, 8
+```
+  Timeline -->    0     1     2     3     4     5     6     7     8     9
 
-    section Async
-    HTML Parsing     :b1, 0, 3
-    Script Download  :b2, 1, 3
-    Script Execute   :crit, b3, 3, 4
-    HTML Parsing     :b4, 4, 8
+  NORMAL:
+  HTML Parsing    [=====]                                [============]
+  Script Download       [=========]
+  Script Execute                   [=====]
+                        ^ BLOCKED! HTML parsing stops
 
-    section Defer
-    HTML Parsing     :c1, 0, 8
-    Script Download  :c2, 1, 3
-    Script Execute   :c3, 8, 9
+  ASYNC:
+  HTML Parsing    [================]    [=========================]
+  Script Download    [=========]
+  Script Execute                   [===]
+                                   ^ Brief pause when script is ready
+
+  DEFER:
+  HTML Parsing    [===================================================]
+  Script Download    [=========]
+  Script Execute                                                       [===]
+                                                                       ^ Runs AFTER
+                                                                         HTML is done
 ```
 
 ---
@@ -422,19 +413,28 @@ gantt
 
 The **DOM** and **CSSOM** are merged to form the **Render Tree**. The render tree only contains **visible** elements — things like `display: none` elements or `<head>` are excluded.
 
-```mermaid
-flowchart LR
-    A[DOM Tree] --> C[Render Tree]
-    B[CSSOM] --> C
-    C --> D[Layout]
+```
+      DOM Tree          CSSOM
+         \               /
+          \             /
+           v           v
+        +----------------+
+        |  Render Tree   |
+        +----------------+
+                |
+                v
+            Layout
 ```
 
-```mermaid
-graph TD
-    A["Render Tree Root"] --> B["body (font: 16px Arial)"]
-    B --> C[".container (max-width: 1200px)"]
-    C --> D["h1 (color: #333, font-size: 2em)"]
-    C --> E["p (color: #666, line-height: 1.6)"]
+```
+  Render Tree (visible elements only)
+  =====================================
+
+  Render Root
+    └── body (font: 16px Arial)
+          └── .container (max-width: 1200px)
+                ├── h1 (color: #333; font-size: 2em)
+                └── p  (color: #666; line-height: 1.6)
 ```
 
 > Elements with `display: none` are in the DOM but **not** in the render tree. Elements with `visibility: hidden` **are** in the render tree (they still take up space).
@@ -492,34 +492,66 @@ The composited layers are sent to the **GPU**, which draws the final pixels on y
 
 Here's the entire process in one diagram:
 
-```mermaid
-flowchart TD
-    A["User types URL"] --> B["DNS Lookup"]
-    B --> C["TCP Handshake"]
-    C --> D{"HTTPS?"}
-    D -->|Yes| E["TLS/SSL Handshake"]
-    D -->|No| F["HTTP Request"]
-    E --> F
-    F --> G["Server Processes Request"]
-    G --> H["HTTP Response (HTML)"]
-    H --> I["Parse HTML → Build DOM"]
-    I --> J["Fetch CSS, JS, Images"]
-    J --> K["Parse CSS → Build CSSOM"]
-    J --> L["Parse & Execute JS"]
-    K --> M["Merge DOM + CSSOM → Render Tree"]
-    L --> M
-    M --> N["Layout (calculate positions)"]
-    N --> O["Paint (fill pixels)"]
-    O --> P["Composite (merge layers)"]
-    P --> Q["Display on Screen"]
+```
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                    FROM URL TO PIXELS                            │
+  └──────────────────────────────────────────────────────────────────┘
 
-    style A fill:#e74c3c,color:#fff
-    style B fill:#e67e22,color:#fff
-    style C fill:#f1c40f,color:#000
-    style E fill:#1abc9c,color:#fff
-    style F fill:#3498db,color:#fff
-    style H fill:#9b59b6,color:#fff
-    style Q fill:#2ecc71,color:#fff
+  User types URL
+       |
+       v
+  [1. DNS Lookup]  ............  Domain name --> IP address
+       |
+       v
+  [2. TCP Handshake]  .........  SYN --> SYN-ACK --> ACK
+       |
+       v
+  {HTTPS?}
+   |       |
+   Yes     No
+   |       |
+   v       |
+  [3. TLS/SSL Handshake]      |
+   |       |                   |
+   +-------+-------------------+
+       |
+       v
+  [4. HTTP Request Sent]  ....  GET /index.html HTTP/1.1
+       |
+       v
+  [5. Server Processes Request]
+       |
+       v
+  [6. HTTP Response (HTML)]
+       |
+       v
+  [7. Parse HTML --> Build DOM]
+       |
+       +---------------------------+
+       |                           |
+       v                           v
+  [8. Fetch CSS, JS, Images]     (parallel)
+       |                           |
+       v                           v
+  [9. Parse CSS       [10. Parse & Execute JS]
+       --> Build CSSOM]            |
+       |                           |
+       +-------------+-------------+
+                     |
+                     v
+       [11. Merge DOM + CSSOM --> Render Tree]
+                     |
+                     v
+       [12. Layout (calculate positions & sizes)]
+                     |
+                     v
+       [13. Paint (fill in pixels)]
+                     |
+                     v
+       [14. Composite (merge layers via GPU)]
+                     |
+                     v
+       [15. Display on Screen!]
 ```
 
 ---
@@ -528,14 +560,14 @@ flowchart TD
 
 | Phase | What Happens |
 |-------|-------------|
-| **DNS Lookup** | Domain name → IP address |
-| **TCP Handshake** | SYN → SYN+ACK → ACK (reliable connection) |
+| **DNS Lookup** | Domain name --> IP address |
+| **TCP Handshake** | SYN --> SYN+ACK --> ACK (reliable connection) |
 | **TLS Handshake** | Certificate exchange + encryption setup |
 | **HTTP Request** | Browser requests resources from server |
 | **Loading** | HTML downloaded, parsed for sub-resources |
-| **DOM Construction** | HTML → DOM tree |
-| **CSSOM Construction** | CSS → CSSOM tree (render-blocking) |
-| **JS Execution** | Parse → AST → Bytecode → Execute (parser-blocking) |
+| **DOM Construction** | HTML --> DOM tree |
+| **CSSOM Construction** | CSS --> CSSOM tree (render-blocking) |
+| **JS Execution** | Parse --> AST --> Bytecode --> Execute (parser-blocking) |
 | **Render Tree** | DOM + CSSOM merged (visible elements only) |
 | **Layout** | Calculate size and position of every element |
 | **Paint** | Fill in pixels for each layer |

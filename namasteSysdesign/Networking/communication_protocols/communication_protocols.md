@@ -29,21 +29,25 @@ TCP is a **transport layer** protocol. It's the foundation that protocols like H
 
 Before any data is sent, TCP establishes a **reliable connection** between the client and the server using a 3-step handshake:
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Server
-
-    Note over Client,Server: Step 1 — SYN (Synchronize)
-    Client->>Server: SYN: "Hey, I want to talk. My sequence number is X."
-
-    Note over Client,Server: Step 2 — SYN-ACK (Synchronize + Acknowledge)
-    Server->>Client: SYN-ACK: "Got it! My sequence number is Y. I acknowledge X+1."
-
-    Note over Client,Server: Step 3 — ACK (Acknowledge)
-    Client->>Server: ACK: "Great! I acknowledge Y+1. Let's go!"
-
-    Note over Client,Server: ✅ Connection Established — Data can flow
+```
+    Client                                          Server
+      |                                               |
+      |   ---- Step 1: SYN ----------------------->   |
+      |   "Hey, I want to talk.                       |
+      |    My sequence number is X."                   |
+      |                                               |
+      |   <--- Step 2: SYN-ACK --------------------   |
+      |                  "Got it! My sequence number   |
+      |                   is Y. I acknowledge X+1."    |
+      |                                               |
+      |   ---- Step 3: ACK ----------------------->   |
+      |   "Great! I acknowledge Y+1.                   |
+      |    Let's go!"                                  |
+      |                                               |
+      |   =========================================   |
+      |          CONNECTION ESTABLISHED                |
+      |          Data can now flow freely              |
+      |   =========================================   |
 ```
 
 ### How TCP guarantees reliability
@@ -60,17 +64,20 @@ sequenceDiagram
 
 When the conversation is done, TCP gracefully closes the connection:
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Server
-
-    Client->>Server: FIN: "I'm done sending."
-    Server->>Client: ACK: "Got it."
-    Server->>Client: FIN: "I'm done too."
-    Client->>Server: ACK: "Acknowledged. Goodbye!"
-
-    Note over Client,Server: ❌ Connection Closed
+```
+    Client                                          Server
+      |                                               |
+      |   ---- FIN: "I'm done sending." ---------->   |
+      |                                               |
+      |   <--- ACK: "Got it." ---------------------   |
+      |                                               |
+      |   <--- FIN: "I'm done too." ---------------   |
+      |                                               |
+      |   ---- ACK: "Acknowledged. Goodbye!" ----->   |
+      |                                               |
+      |   =========================================   |
+      |              CONNECTION CLOSED                 |
+      |   =========================================   |
 ```
 
 ### Real-Life Use Cases
@@ -93,18 +100,19 @@ UDP is also a **transport layer** protocol, but it's the polar opposite of TCP. 
 
 There is **no handshake, no connection, no guarantees**. The sender simply fires off packets (called **datagrams**) to the receiver.
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Server
-
-    Note over Client,Server: No handshake needed!
-
-    Client->>Server: Datagram 1: "Here's some data"
-    Client->>Server: Datagram 2: "Here's more data"
-    Client->>Server: Datagram 3: "And more..."
-
-    Note over Client,Server: Server receives whatever arrives.<br/>No ACKs. No retransmission.<br/>Packets may arrive out of order or not at all.
+```
+    Client                                          Server
+      |                                               |
+      |   (No handshake needed!)                       |
+      |                                               |
+      |   ---- Datagram 1: "Here's some data" ---->   |
+      |   ---- Datagram 2: "Here's more data" ---->   |
+      |   ---- Datagram 3: "And more..." ---------->   |
+      |                                               |
+      |   Server receives whatever arrives.            |
+      |   No ACKs. No retransmission.                  |
+      |   Packets may arrive out of order              |
+      |   or not at all.                               |
 ```
 
 ### TCP vs UDP — Side by Side
@@ -138,35 +146,40 @@ HTTP follows a **request-response model** — the client asks, the server answer
 
 ### How it works
 
-```mermaid
-sequenceDiagram
-    participant Browser as 🌐 Browser (Client)
-    participant Server as 🖥️ Server
-
-    Note over Browser,Server: Step 1 — TCP Handshake (SYN, SYN-ACK, ACK)
-    Browser->>Server: TCP: SYN
-    Server->>Browser: TCP: SYN-ACK
-    Browser->>Server: TCP: ACK
-
-    Note over Browser,Server: Step 2 — HTTP Request
-    Browser->>Server: GET /index.html HTTP/1.1<br/>Host: example.com<br/>Accept: text/html
-
-    Note over Browser,Server: Step 3 — HTTP Response
-    Server->>Browser: HTTP/1.1 200 OK<br/>Content-Type: text/html<br/><br/><html>...</html>
-
-    Note over Browser,Server: Step 4 — TCP Connection Closed (or kept alive)
-    Browser->>Server: TCP: FIN
-    Server->>Browser: TCP: FIN-ACK
+```
+    Browser (Client)                                Server
+      |                                               |
+      |   ===== Step 1: TCP Handshake =====           |
+      |   ---- SYN --------------------------->       |
+      |   <--- SYN-ACK ------------------------       |
+      |   ---- ACK --------------------------->       |
+      |                                               |
+      |   ===== Step 2: HTTP Request =====            |
+      |   ------------------------------------>       |
+      |   GET /index.html HTTP/1.1                     |
+      |   Host: example.com                            |
+      |   Accept: text/html                            |
+      |                                               |
+      |   ===== Step 3: HTTP Response =====           |
+      |   <------------------------------------       |
+      |   HTTP/1.1 200 OK                              |
+      |   Content-Type: text/html                      |
+      |                                               |
+      |   <html>...</html>                             |
+      |                                               |
+      |   ===== Step 4: Connection Closed =====       |
+      |   ---- FIN --------------------------->       |
+      |   <--- FIN-ACK ------------------------       |
 ```
 
 ### Anatomy of an HTTP Request
 
 ```
-GET /api/users HTTP/1.1          ← Method + Path + Version
-Host: example.com                ← Which server
-Accept: application/json         ← What format I want
-Authorization: Bearer abc123     ← Authentication
-Content-Type: application/json   ← Format of body (for POST/PUT)
+GET /api/users HTTP/1.1          <-- Method + Path + Version
+Host: example.com                <-- Which server
+Accept: application/json         <-- What format I want
+Authorization: Bearer abc123     <-- Authentication
+Content-Type: application/json   <-- Format of body (for POST/PUT)
 ```
 
 ### HTTP Methods
@@ -221,30 +234,44 @@ Think of HTTP as a **postcard** (anyone handling it can read it) and HTTPS as a 
 
 Before any HTTP data flows, a TLS handshake happens **on top of the TCP handshake**:
 
-```mermaid
-sequenceDiagram
-    participant Browser as 🌐 Browser
-    participant Server as 🖥️ Server
-
-    Note over Browser,Server: TCP 3-Way Handshake (SYN → SYN-ACK → ACK)
-
-    Note over Browser,Server: 🔐 TLS Handshake Begins
-
-    Browser->>Server: ClientHello: "I support TLS 1.3, here are my cipher suites"
-    Server->>Browser: ServerHello: "Let's use TLS 1.3 with AES-256-GCM"
-    Server->>Browser: Certificate: "Here's my SSL certificate (signed by a CA)"
-    Server->>Browser: ServerKeyExchange: "Here's my public key"
-
-    Note over Browser: Browser verifies certificate<br/>against trusted Certificate Authorities (CAs)
-
-    Browser->>Server: ClientKeyExchange: "Here's my part of the key"
-
-    Note over Browser,Server: Both sides compute the<br/>shared symmetric session key
-
-    Browser->>Server: Finished (encrypted)
-    Server->>Browser: Finished (encrypted)
-
-    Note over Browser,Server: ✅ Secure channel established!<br/>All HTTP data is now encrypted
+```
+    Browser                                         Server
+      |                                               |
+      |   ===== TCP 3-Way Handshake =====             |
+      |   (SYN -> SYN-ACK -> ACK)                     |
+      |                                               |
+      |   ===== TLS Handshake Begins =====            |
+      |                                               |
+      |   ---- ClientHello ----------------------->   |
+      |   "I support TLS 1.3,                          |
+      |    here are my cipher suites"                  |
+      |                                               |
+      |   <--- ServerHello ------------------------   |
+      |        "Let's use TLS 1.3 with AES-256-GCM"   |
+      |                                               |
+      |   <--- Certificate ------------------------   |
+      |        "Here's my SSL certificate              |
+      |         (signed by a CA)"                      |
+      |                                               |
+      |   <--- ServerKeyExchange ------------------   |
+      |        "Here's my public key"                  |
+      |                                               |
+      |   [Browser verifies certificate against        |
+      |    trusted Certificate Authorities (CAs)]      |
+      |                                               |
+      |   ---- ClientKeyExchange ----------------->   |
+      |   "Here's my part of the key"                  |
+      |                                               |
+      |   [Both sides compute the shared               |
+      |    symmetric session key]                      |
+      |                                               |
+      |   ---- Finished (encrypted) -------------->   |
+      |   <--- Finished (encrypted) ---------------   |
+      |                                               |
+      |   =========================================   |
+      |     SECURE CHANNEL ESTABLISHED!                |
+      |     All HTTP data is now encrypted             |
+      |   =========================================   |
 ```
 
 ### What TLS protects against
@@ -270,7 +297,7 @@ This gives you the best of both worlds — security AND speed.
 
 ### Real-Life Use Cases
 
-- **Every modern website** (browsers show a 🔒 padlock for HTTPS)
+- **Every modern website** (browsers show a padlock for HTTPS)
 - **Online banking & payments**
 - **Login pages** — passwords are encrypted in transit
 - **APIs** — securing data between services
@@ -288,56 +315,68 @@ Why? TCP has a fundamental problem called **Head-of-Line Blocking** — if one p
 
 ### The Problem with HTTP/2 over TCP
 
-```mermaid
-graph TD
-    A[HTTP/2 over TCP] --> B[Stream 1: Image]
-    A --> C[Stream 2: CSS]
-    A --> D[Stream 3: JS]
-
-    B --> E[Packet Lost! ❌]
-    E --> F[ALL streams blocked ⏸️<br/>waiting for retransmission]
-
-    style E fill:#ff6b6b
-    style F fill:#ffa94d
+```
+              HTTP/2 over TCP
+              (single TCP connection)
+                     |
+         +-----------+-----------+
+         |           |           |
+    Stream 1    Stream 2    Stream 3
+     Image        CSS          JS
+         |           |           |
+    [Packet Lost!]   |           |
+         X           |           |
+         |           |           |
+    +----+-----------+-----------+----+
+    |   ALL streams blocked!          |
+    |   Waiting for retransmission    |
+    |   of the lost packet...         |
+    +---------------------------------+
 ```
 
 ### How QUIC (HTTP/3) solves it
 
-```mermaid
-graph TD
-    A[HTTP/3 over QUIC/UDP] --> B[Stream 1: Image]
-    A --> C[Stream 2: CSS]
-    A --> D[Stream 3: JS]
-
-    B --> E[Packet Lost! ❌]
-    E --> F[Only Stream 1 affected ⏸️]
-    C --> G[Stream 2 continues ✅]
-    D --> H[Stream 3 continues ✅]
-
-    style E fill:#ff6b6b
-    style F fill:#ffa94d
-    style G fill:#51cf66
-    style H fill:#51cf66
+```
+              HTTP/3 over QUIC (UDP)
+              (independent streams)
+                     |
+         +-----------+-----------+
+         |           |           |
+    Stream 1    Stream 2    Stream 3
+     Image        CSS          JS
+         |           |           |
+    [Packet Lost!]   |           |
+         X           |           |
+         |           |           |
+    Only Stream 1   Stream 2   Stream 3
+    is blocked!     continues  continues
+                       OK!        OK!
 ```
 
 ### How it works
 
-```mermaid
-sequenceDiagram
-    participant Browser as 🌐 Browser
-    participant Server as 🖥️ Server
-
-    Note over Browser,Server: QUIC combines TCP handshake + TLS handshake<br/>into a SINGLE round trip (0-RTT or 1-RTT)
-
-    Browser->>Server: QUIC Initial: ClientHello + Connection Setup
-    Server->>Browser: QUIC Handshake: ServerHello + Certificate + Done
-
-    Note over Browser,Server: ✅ Connection established in 1 round trip!<br/>(TCP+TLS would take 2-3 round trips)
-
-    Browser->>Server: HTTP/3 Request: GET /page
-    Server->>Browser: HTTP/3 Response: 200 OK + data
-
-    Note over Browser,Server: If client has connected before:<br/>0-RTT — sends data immediately!
+```
+    Browser                                         Server
+      |                                               |
+      |   QUIC combines TCP handshake + TLS handshake  |
+      |   into a SINGLE round trip (0-RTT or 1-RTT)   |
+      |                                               |
+      |   ---- QUIC Initial ---------------------->   |
+      |   ClientHello + Connection Setup               |
+      |                                               |
+      |   <--- QUIC Handshake ---------------------   |
+      |        ServerHello + Certificate + Done        |
+      |                                               |
+      |   =========================================   |
+      |   Connection established in 1 round trip!      |
+      |   (TCP+TLS would take 2-3 round trips)         |
+      |   =========================================   |
+      |                                               |
+      |   ---- HTTP/3 Request: GET /page ---------->   |
+      |   <--- HTTP/3 Response: 200 OK + data -----   |
+      |                                               |
+      |   If client has connected before:              |
+      |   0-RTT — sends data immediately!              |
 ```
 
 ### Key advantages of HTTP/3
@@ -371,48 +410,56 @@ Think of HTTP as **walkie-talkie** (one talks, the other listens, then they swit
 
 WebSocket starts as an HTTP request (called the **upgrade handshake**), then upgrades to a persistent WebSocket connection:
 
-```mermaid
-sequenceDiagram
-    participant Client as 🌐 Client
-    participant Server as 🖥️ Server
-
-    Note over Client,Server: Step 1 — HTTP Upgrade Handshake
-
-    Client->>Server: GET /chat HTTP/1.1<br/>Upgrade: websocket<br/>Connection: Upgrade<br/>Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
-
-    Server->>Client: HTTP/1.1 101 Switching Protocols<br/>Upgrade: websocket<br/>Connection: Upgrade<br/>Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
-
-    Note over Client,Server: ✅ WebSocket Connection Established!<br/>Full-duplex communication begins
-
-    Client->>Server: {"type": "message", "text": "Hello!"}
-    Server->>Client: {"type": "message", "text": "Hi there!"}
-    Server->>Client: {"type": "notification", "text": "New user joined"}
-    Client->>Server: {"type": "typing", "user": "Alice"}
-    Server->>Client: {"type": "message", "text": "Another message"}
-
-    Note over Client,Server: Either side can send at any time!<br/>No request-response pattern needed
+```
+    Client                                          Server
+      |                                               |
+      |   ===== Step 1: HTTP Upgrade Handshake =====  |
+      |                                               |
+      |   ---- GET /chat HTTP/1.1 ---------------->   |
+      |        Upgrade: websocket                      |
+      |        Connection: Upgrade                     |
+      |        Sec-WebSocket-Key: dGhlIHN...           |
+      |                                               |
+      |   <--- HTTP/1.1 101 Switching Protocols ----   |
+      |        Upgrade: websocket                      |
+      |        Connection: Upgrade                     |
+      |        Sec-WebSocket-Accept: s3pPL...          |
+      |                                               |
+      |   =========================================   |
+      |     WebSocket Connection Established!          |
+      |     Full-duplex communication begins           |
+      |   =========================================   |
+      |                                               |
+      |   ---- {"type":"message","text":"Hello!"} ->   |
+      |   <--- {"type":"message","text":"Hi!"} -----   |
+      |   <--- {"type":"notif","text":"User joined"}-  |
+      |   ---- {"type":"typing","user":"Alice"} --->   |
+      |   <--- {"type":"message","text":"Bye!"} ----   |
+      |                                               |
+      |   Either side can send at any time!            |
+      |   No request-response pattern needed.          |
 ```
 
 ### HTTP Polling vs WebSocket
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Server
+```
+  HTTP Polling (Wasteful)              WebSocket (Efficient)
+  ========================             ========================
 
-    Note over Client,Server: ❌ HTTP Polling (Wasteful)
-    Client->>Server: Any new messages?
-    Server->>Client: No.
-    Client->>Server: Any new messages?
-    Server->>Client: No.
-    Client->>Server: Any new messages?
-    Server->>Client: Yes! Here's the message.
-
-    Note over Client,Server: ✅ WebSocket (Efficient)
-    Client->>Server: [Connection established]
-    Server->>Client: New message arrived!
-    Server->>Client: Another message!
-    Server->>Client: And another!
+  Client           Server              Client           Server
+    |                 |                   |                 |
+    |--"New msgs?"-->|                   |--[Connect]---->|
+    |<--"No."--------|                   |                 |
+    |                 |                   |<--"New msg!"---|
+    |--"New msgs?"-->|                   |<--"Another!"---|
+    |<--"No."--------|                   |<--"And more!"--|
+    |                 |                   |                 |
+    |--"New msgs?"-->|                   |--"My reply"--->|
+    |<--"Yes! Here"--|                   |<--"Response"---|
+    |                 |                   |                 |
+  Constant requests,                    Server pushes data
+  most return nothing.                  only when it exists.
+  Wastes bandwidth.                     Efficient!
 ```
 
 ### Real-Life Use Cases
@@ -439,37 +486,36 @@ FTP is unique because it uses **two separate TCP connections**:
 1. **Control Connection (Port 21)** — for sending commands (login, navigate directories, request files)
 2. **Data Connection (Port 20)** — for actually transferring the file data
 
-```mermaid
-sequenceDiagram
-    participant Client as 📁 FTP Client
-    participant Server as 🖥️ FTP Server
-
-    Note over Client,Server: Control Connection (Port 21)
-
-    Client->>Server: Connect to port 21
-    Server->>Client: 220 Welcome to FTP Server
-
-    Client->>Server: USER admin
-    Server->>Client: 331 Password required
-
-    Client->>Server: PASS ****
-    Server->>Client: 230 Login successful
-
-    Client->>Server: CWD /uploads
-    Server->>Client: 250 Directory changed
-
-    Client->>Server: RETR report.pdf
-    Server->>Client: 150 Opening data connection
-
-    Note over Client,Server: Data Connection (Port 20)
-
-    Server->>Client: [Binary data: report.pdf content...]
-    Server->>Client: 226 Transfer complete
-
-    Note over Client,Server: Control connection stays open<br/>Data connection closes after each transfer
-
-    Client->>Server: QUIT
-    Server->>Client: 221 Goodbye
+```
+    FTP Client                                      FTP Server
+      |                                               |
+      |   ===== Control Connection (Port 21) =====    |
+      |                                               |
+      |   ---- Connect to port 21 --------------->    |
+      |   <--- 220 Welcome to FTP Server ----------   |
+      |                                               |
+      |   ---- USER admin ----------------------->    |
+      |   <--- 331 Password required --------------   |
+      |                                               |
+      |   ---- PASS **** ------------------------>    |
+      |   <--- 230 Login successful ---------------   |
+      |                                               |
+      |   ---- CWD /uploads -------------------->    |
+      |   <--- 250 Directory changed --------------   |
+      |                                               |
+      |   ---- RETR report.pdf ----------------->    |
+      |   <--- 150 Opening data connection --------   |
+      |                                               |
+      |   ===== Data Connection (Port 20) =====       |
+      |                                               |
+      |   <--- [Binary data: report.pdf] ----------   |
+      |   <--- 226 Transfer complete --------------   |
+      |                                               |
+      |   (Control connection stays open.              |
+      |    Data connection closes after transfer.)     |
+      |                                               |
+      |   ---- QUIT ----------------------------->    |
+      |   <--- 221 Goodbye -----------------------   |
 ```
 
 ### FTP Modes
@@ -483,12 +529,12 @@ sequenceDiagram
 
 | Protocol | Encrypted? | Use Case |
 |---|---|---|
-| **FTP** | ❌ No (plain text, even passwords!) | Legacy systems only |
-| **FTPS** | ✅ FTP + TLS encryption | Secure file transfer (FTP with SSL) |
-| **SFTP** | ✅ Runs over SSH | Secure file transfer (completely different protocol) |
-| **SCP** | ✅ Runs over SSH | Simple secure file copy |
+| **FTP** | No (plain text, even passwords!) | Legacy systems only |
+| **FTPS** | Yes — FTP + TLS encryption | Secure file transfer (FTP with SSL) |
+| **SFTP** | Yes — Runs over SSH | Secure file transfer (completely different protocol) |
+| **SCP** | Yes — Runs over SSH | Simple secure file copy |
 
-> ⚠️ **Warning:** Plain FTP sends everything (including passwords) in **clear text**. Never use plain FTP for sensitive data. Use **SFTP** or **FTPS** instead.
+> **Warning:** Plain FTP sends everything (including passwords) in **clear text**. Never use plain FTP for sensitive data. Use **SFTP** or **FTPS** instead.
 
 ### Real-Life Use Cases
 
@@ -503,13 +549,13 @@ sequenceDiagram
 
 | Protocol | Layer | Built On | Connection | Reliable? | Encrypted? | Duplex | Speed |
 |---|---|---|---|---|---|---|---|
-| **TCP** | Transport | IP | Connection-oriented | ✅ Yes | ❌ No | Full | Moderate |
-| **UDP** | Transport | IP | Connectionless | ❌ No | ❌ No | Full | Fast |
-| **HTTP** | Application | TCP | Request-Response | ✅ Yes | ❌ No | Half | Moderate |
-| **HTTPS** | Application | TCP + TLS | Request-Response | ✅ Yes | ✅ Yes | Half | Moderate |
-| **HTTP/3** | Application | QUIC (UDP) | Request-Response | ✅ Yes | ✅ Yes | Half | Fast |
-| **WebSocket** | Application | TCP | Persistent | ✅ Yes | Optional (WSS) | Full | Fast |
-| **FTP** | Application | TCP | Dual TCP | ✅ Yes | ❌ No | Half | Moderate |
+| **TCP** | Transport | IP | Connection-oriented | Yes | No | Full | Moderate |
+| **UDP** | Transport | IP | Connectionless | No | No | Full | Fast |
+| **HTTP** | Application | TCP | Request-Response | Yes | No | Half | Moderate |
+| **HTTPS** | Application | TCP + TLS | Request-Response | Yes | Yes | Half | Moderate |
+| **HTTP/3** | Application | QUIC (UDP) | Request-Response | Yes | Yes | Half | Fast |
+| **WebSocket** | Application | TCP | Persistent | Yes | Optional (WSS) | Full | Fast |
+| **FTP** | Application | TCP | Dual TCP | Yes | No | Half | Moderate |
 
 ---
 
@@ -537,9 +583,9 @@ sequenceDiagram
 │              └──────────────┘                            │
 └─────────────────────────────────────────────────────────┘
 
-HTTP, HTTPS, WebSocket, FTP  →  use TCP
-HTTP/3                       →  uses QUIC which uses UDP
-HTTPS                        →  adds TLS on top of TCP
+HTTP, HTTPS, WebSocket, FTP  -->  use TCP
+HTTP/3                       -->  uses QUIC which uses UDP
+HTTPS                        -->  adds TLS on top of TCP
 ```
 
 ---
