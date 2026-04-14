@@ -22,7 +22,7 @@ function outer() {
   return function inner(y) {
     x = x + y;
     return x;
-  }
+  };
 }
 /** disadvantage of closure */
 
@@ -61,16 +61,15 @@ console.log("Global call");
 
 // https://stackblitz.com/edit/react-1m5esi?file=src%2FApp.js
 
-
 /** undo redo react code */
 
-import React, { useState, useEffect, useRef } from 'react';
-import './style.css';
+import React, { useState, useEffect, useRef } from "react";
+import "./style.css";
 
-const DEBOUNCE_TIMER = 500;
+const DEBOUNCE_TIMER = 1000;
 
 export default function App() {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const undoStack = useRef([]);
   const redoStack = useRef([]);
   const allowSave = useRef(true);
@@ -127,7 +126,6 @@ export default function App() {
     </div>
   );
 }
-
 
 // debounce
 
