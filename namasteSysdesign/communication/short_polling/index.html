@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Short Polling</title>
+  </head>
+  <body>
+    <h1>Short Polling</h1>
+    <script>
+      let intervalId;
+      const getData = async () => {
+        const response = await fetch("http://localhost:4010/getData");
+        const data = await response.json();
+        const dataContainer = document.getElementById("data-container");
+        dataContainer.innerHTML = data.data;
+        if (data.status === "success") {
+          clearInterval(intervalId);
+        }
+      };
+      function startPolling() {
+        intervalId = setInterval(() => {
+          getData();
+        }, 2000);
+      }
+      startPolling();
+    </script>
+    <div id="data-container"></div>
+  </body>
+</html>
